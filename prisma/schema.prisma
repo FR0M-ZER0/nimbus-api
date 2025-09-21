@@ -15,7 +15,6 @@ model Usuario {
   senha           String   @db.VarChar(255)
   id_nivel_acesso Int
   data_criacao    DateTime @default(now()) @db.Timestamp(6)
-  ativo           Boolean  @default(true)
 
   nivel_acesso NivelAcesso @relation(fields: [id_nivel_acesso], references: [id_nivel_acesso])
   estacoes     Estacao[]
@@ -42,50 +41,49 @@ model Estacao {
   data_criacao DateTime @default(now()) @db.Timestamp(6)
   id_usuario   Int
 
-  usuario  Usuario  @relation(fields: [id_usuario], references: [id_usuario])
-  sensores Sensor[]
-  alertas  Alerta[]
+  usuario    Usuario     @relation(fields: [id_usuario], references: [id_usuario])
+  parametros Parametro[]
 
   @@map("estacao")
 }
 
 model Alerta {
-  id_alerta  Int      @id @default(autoincrement())
-  id_estacao Int
-  id_usuario Int
-  titulo     String   @db.VarChar(255)
-  texto      String   @db.Text
-  data_hora  DateTime @default(now()) @db.Timestamp(6)
-  status     String   @db.VarChar(20)
+  id_alerta      Int      @id @default(autoincrement())
+  id_tipo_alerta Int
+  id_usuario     Int
+  data_criacao   DateTime @default(now()) @db.Timestamp(6)
+  mensagem       String   @db.Text
 
-  estacao Estacao @relation(fields: [id_estacao], references: [id_estacao])
-  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+  tipo_alerta TipoAlerta @relation(fields: [id_tipo_alerta], references: [id])
+  usuario     Usuario    @relation(fields: [id_usuario], references: [id_usuario])
 
   @@map("alerta")
 }
 
 model Medida {
-  id_medida Int      @id @default(autoincrement())
-  id_sensor Int
-  valor     Decimal  @db.Decimal(10, 2)
-  data_hora DateTime @default(now()) @db.Timestamp(6)
+  id_medida    Int     @id @default(autoincrement())
+  id_parametro Int
+  valor        Decimal @db.Decimal(10, 2)
+  data_hora    Int
 
-  sensor Sensor @relation(fields: [id_sensor], references: [id_sensor])
+  parametro Parametro @relation(fields: [id_parametro], references: [id_parametro])
 
   @@map("medida")
 }
 
-model Sensor {
-  id_sensor         Int     @id
+model Parametro {
+  id_parametro      Int     @id
   id_estacao        Int
   id_tipo_parametro Int
   descricao         String? @db.Text
+  json              Json    @db.Json
 
   estacao        Estacao       @relation(fields: [id_estacao], references: [id_estacao])
   tipo_parametro TipoParametro @relation(fields: [id_tipo_parametro], references: [id_tipo_parametro])
   medidas        Medida[]
+  tipos_alerta   TipoAlerta[]
 
-  @@map("sensor")
+  @@map("parametro")
 }
 
 model TipoParametro {
@@ -96,7 +94,19 @@ model TipoParametro {
   polinomio         Decimal? @db.Decimal(10, 8)
   offset            Int?
 
-  sensores Sensor[]
+  parametros Parametro[]
 
   @@map("tipo_parametro")
+}
+
+model TipoAlerta {
+  id           Int     @id @default(autoincrement())
+  operador     String  @db.VarChar(10)
+  valor        Decimal @db.Decimal(10, 2)
+  id_parametro Int
+
+  parametro Parametro @relation(fields: [id_parametro], references: [id_parametro])
+  alertas   Alerta[]
+
+  @@map("tipo_alerta")
 }
