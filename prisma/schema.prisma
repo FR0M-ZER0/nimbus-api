@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -12,4 +6,107 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id_usuario      Int      @id @default(autoincrement())
+  nome            String   @db.VarChar(255)
+  email           String   @unique @db.VarChar(255)
+  senha           String   @db.VarChar(255)
+  id_nivel_acesso Int
+  data_criacao    DateTime @default(now()) @db.Timestamp(6)
+
+  nivel_acesso NivelAcesso @relation(fields: [id_nivel_acesso], references: [id_nivel_acesso])
+  estacoes     Estacao[]
+  alertas      Alerta[]
+
+  @@map("usuarios")
+}
+
+model NivelAcesso {
+  id_nivel_acesso Int       @id @default(autoincrement())
+  descricao       String    @db.VarChar(50)
+  usuarios        Usuario[]
+
+  @@map("nivel_acesso")
+}
+
+model Estacao {
+  id_estacao   Int      @id
+  nome         String   @db.VarChar(255)
+  endereco     String?  @db.VarChar(255)
+  latitude     Decimal  @db.Decimal(10, 8)
+  longitude    Decimal  @db.Decimal(10, 8)
+  descricao    String?  @db.Text
+  data_criacao DateTime @default(now()) @db.Timestamp(6)
+  id_usuario   Int
+
+  usuario    Usuario     @relation(fields: [id_usuario], references: [id_usuario])
+  parametros Parametro[]
+
+  @@map("estacao")
+}
+
+model Alerta {
+  id_alerta      Int      @id @default(autoincrement())
+  id_tipo_alerta Int
+  id_usuario     Int
+  data_criacao   DateTime @default(now()) @db.Timestamp(6)
+  mensagem       String   @db.Text
+
+  tipo_alerta TipoAlerta @relation(fields: [id_tipo_alerta], references: [id])
+  usuario     Usuario    @relation(fields: [id_usuario], references: [id_usuario])
+
+  @@map("alerta")
+}
+
+model Medida {
+  id_medida    Int     @id @default(autoincrement())
+  id_parametro Int
+  valor        Decimal @db.Decimal(10, 2)
+  data_hora    Int
+
+  parametro Parametro @relation(fields: [id_parametro], references: [id_parametro])
+
+  @@map("medida")
+}
+
+model Parametro {
+  id_parametro      Int     @id
+  id_estacao        Int
+  id_tipo_parametro Int
+  descricao         String? @db.Text
+  json              Json    @db.Json
+
+  estacao        Estacao       @relation(fields: [id_estacao], references: [id_estacao])
+  tipo_parametro TipoParametro @relation(fields: [id_tipo_parametro], references: [id_tipo_parametro])
+  medidas        Medida[]
+  tipos_alerta   TipoAlerta[]
+
+  @@map("parametro")
+}
+
+model TipoParametro {
+  id_tipo_parametro Int      @id @default(autoincrement())
+  nome              String   @db.VarChar(100)
+  unidade           String   @db.VarChar(20)
+  fator             Int?
+  polinomio         Decimal? @db.Decimal(10, 8)
+  offset            Int?
+
+  parametros Parametro[]
+
+  @@map("tipo_parametro")
+}
+
+model TipoAlerta {
+  id           Int     @id @default(autoincrement())
+  operador     String  @db.VarChar(10)
+  valor        Decimal @db.Decimal(10, 2)
+  id_parametro Int
+
+  parametro Parametro @relation(fields: [id_parametro], references: [id_parametro])
+  alertas   Alerta[]
+
+  @@map("tipo_alerta")
 }
