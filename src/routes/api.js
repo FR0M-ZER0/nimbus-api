@@ -10,13 +10,14 @@ import {
     updateStation,
     deleteStation
 } from '../controllers/stationController.js'
+
 import {
-    createUsuario,
-    getAllUsuarios,
-    getUsuarioById,
-    updateUsuario,
-    deleteUsuario
-} from '../controllers/userController.js'
+    createParameter,
+    getAllParameters,
+    getParameterById,
+    updateParameter,
+    deleteParameter
+} from '../controllers/parameterController.js'
 
 // Health Check
 
@@ -185,203 +186,15 @@ router.put('/stations/:id', updateStation)
 */
 router.delete('/stations/:id', deleteStation)
 
-// Usuarios (Users)
 
-/**
-* @swagger
-* /usuarios:
-*   post:
-*     summary: Cria um novo usuário
-*     requestBody:
-*       required: true
-*       content:
-*         application/json:
-*           schema:
-*             type: object
-*             required:
-*               - nome
-*               - email
-*               - senha
-*               - id_nivel_acesso
-*             properties:
-*               nome:
-*                 type: string
-*                 example: João Silva
-*               email:
-*                 type: string
-*                 example: joao@email.com
-*               senha:
-*                 type: string
-*                 example: senha123
-*               id_nivel_acesso:
-*                 type: integer
-*                 example: 1
-*     responses:
-*       201:
-*         description: Usuário criado com sucesso
-*       400:
-*         description: Erro de validação
-*       409:
-*         description: Conflito - Email já existe
-*       500:
-*         description: Erro ao criar o usuário
-*/
-router.post('/usuarios', createUsuario)
+router.post('/parameters', createParameter)
 
-/**
-* @swagger
-* /usuarios:
-*   get:
-*     summary: Lista todos os usuários
-*     parameters:
-*       - in: query
-*         name: page
-*         schema:
-*           type: integer
-*           default: 1
-*       - in: query
-*         name: limit
-*         schema:
-*           type: integer
-*           default: 10
-*     responses:
-*       200:
-*         description: Lista de usuários
-*         content:
-*           application/json:
-*             schema:
-*               type: object
-*               properties:
-*                 usuarios:
-*                   type: array
-*                   items:
-*                     type: object
-*                     properties:
-*                       id_usuario:
-*                         type: integer
-*                       nome:
-*                         type: string
-*                       email:
-*                         type: string
-*                       id_nivel_acesso:
-*                         type: integer
-*                       data_criacao:
-*                         type: string
-*                         format: date-time
-*                 pagination:
-*                   type: object
-*                   properties:
-*                     page:
-*                       type: integer
-*                     limit:
-*                       type: integer
-*                     total:
-*                       type: integer
-*       500:
-*         description: Erro ao buscar os usuários
-*/
-router.get('/usuarios', getAllUsuarios)
+router.get('/parameters', getAllParameters)
 
-/**
-* @swagger
-* /usuarios/{id}:
-*   get:
-*     summary: Busca um usuário pelo id
-*     parameters:
-*       - in: path
-*         name: id
-*         required: true
-*         schema:
-*           type: integer
-*         description: ID do usuário
-*     responses:
-*       200:
-*         description: Usuário encontrado
-*         content:
-*           application/json:
-*             schema:
-*               type: object
-*               properties:
-*                 id_usuario:
-*                   type: integer
-*                 nome:
-*                   type: string
-*                 email:
-*                   type: string
-*                 id_nivel_acesso:
-*                   type: integer
-*                 data_criacao:
-*                   type: string
-*                   format: date-time
-*       404:
-*         description: Usuário não encontrado
-*       500:
-*         description: Erro ao buscar o usuário
-*/
-router.get('/usuarios/:id', getUsuarioById)
+router.get('/parameters/:id', getParameterById)
 
-/**
-* @swagger
-* /usuarios/{id}:
-*   put:
-*     summary: Atualiza um usuário pelo id
-*     parameters:
-*       - in: path
-*         name: id
-*         required: true
-*         schema:
-*           type: integer
-*         description: ID do usuário
-*     requestBody:
-*       required: true
-*       content:
-*         application/json:
-*           schema:
-*             type: object
-*             properties:
-*               nome:
-*                 type: string
-*                 example: João Silva
-*               email:
-*                 type: string
-*                 example: joao@email.com
-*               id_nivel_acesso:
-*                 type: integer
-*                 example: 1
-*     responses:
-*       200:
-*         description: Usuário atualizado com sucesso
-*       400:
-*         description: Erro de validação
-*       404:
-*         description: Usuário não encontrado
-*       409:
-*         description: Conflito - Email já existe
-*       500:
-*         description: Erro ao atualizar o usuário
-*/
-router.put('/usuarios/:id', updateUsuario)
+router.put('/parameters/:id', updateParameter)
 
-/**
-* @swagger
-* /usuarios/{id}:
-*   delete:
-*     summary: Deleta um usuário pelo id
-*     parameters:
-*       - in: path
-*         name: id
-*         required: true
-*         schema:
-*           type: integer
-*         description: ID do usuário
-*     responses:
-*       200:
-*         description: Usuário deletado com sucesso
-*       404:
-*         description: Usuário não encontrado
-*       500:
-*         description: Erro ao deletar o usuário
-*/
-router.delete('/usuarios/:id', deleteUsuario)
+router.delete('/parameters/:id', deleteParameter)
 
 export default router
