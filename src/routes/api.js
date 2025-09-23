@@ -187,14 +187,140 @@ router.put('/stations/:id', updateStation)
 router.delete('/stations/:id', deleteStation)
 
 
+// Parameters
+
+/**
+ * @swagger
+ * /parameters:
+ *   post:
+ *     summary: Cria um novo parâmetro
+ *     tags: [Parameters]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Parameter'
+ *     responses:
+ *       201:
+ *         description: Parâmetro criado com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Parameter'
+ *       400:
+ *         description: Erro de validação nos dados enviados.
+ *       409:
+ *         description: Conflito - Já existe um parâmetro com o ID fornecido.
+ *       500:
+ *         description: Erro interno do servidor ao criar o parâmetro.
+ */
 router.post('/parameters', createParameter)
 
+/**
+ * @swagger
+ * /parameters:
+ *   get:
+ *     summary: Lista todos os parâmetros existentes
+ *     tags: [Parameters]
+ *     responses:
+ *       200:
+ *         description: Uma lista de todos os parâmetros.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Parameter'
+ *       500:
+ *         description: Erro interno do servidor ao buscar os parâmetros.
+ */
 router.get('/parameters', getAllParameters)
 
+/**
+ * @swagger
+ * /parameters/{id}:
+ *   get:
+ *     summary: Busca um parâmetro específico pelo seu ID
+ *     tags: [Parameters]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: O ID do parâmetro a ser buscado.
+ *     responses:
+ *       200:
+ *         description: Parâmetro encontrado com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Parameter'
+ *       404:
+ *         description: Parâmetro com o ID especificado não foi encontrado.
+ *       500:
+ *         description: Erro interno do servidor ao buscar o parâmetro.
+ */
 router.get('/parameters/:id', getParameterById)
 
+/**
+ * @swagger
+ * /parameters/{id}:
+ *   put:
+ *     summary: Atualiza um parâmetro existente pelo seu ID
+ *     tags: [Parameters]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: O ID do parâmetro a ser atualizado.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Parameter'
+ *     responses:
+ *       200:
+ *         description: Parâmetro atualizado com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Parameter'
+ *       400:
+ *         description: Erro de validação nos dados enviados.
+ *       404:
+ *         description: Parâmetro com o ID especificado não foi encontrado.
+ *       500:
+ *         description: Erro interno do servidor ao atualizar o parâmetro.
+ */
 router.put('/parameters/:id', updateParameter)
 
+/**
+ * @swagger
+ * /parameters/{id}:
+ *   delete:
+ *     summary: Deleta um parâmetro pelo seu ID
+ *     tags: [Parameters]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: O ID do parâmetro a ser deletado.
+ *     responses:
+ *       204:
+ *         description: Parâmetro deletado com sucesso (sem conteúdo no corpo da resposta).
+ *       404:
+ *         description: Parâmetro com o ID especificado não foi encontrado.
+ *       500:
+ *         description: Erro interno do servidor ao deletar o parâmetro.
+ */
 router.delete('/parameters/:id', deleteParameter)
+
 
 export default router
