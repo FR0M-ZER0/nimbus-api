@@ -6,11 +6,11 @@ const prisma = new PrismaClient();
 // Post /parameters - Cria um novo parâmetro
 export const createParameter = async (req, res) => {
   try {
-    const validatedData = createParameterDTO.parse(req.body);
-    const parameter = await prisma.parametro.create({
-      data: validatedData,
+    const data = createParameterDTO.parse(req.body);
+    const parametro = await prisma.parametro.create({
+      data,
     });
-    res.status(201).json(parameter);
+    res.status(201).json(parametro);
   } catch (error) {
     if (error.code === "P2002") {
       return res.status(409).json({

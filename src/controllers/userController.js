@@ -1,7 +1,6 @@
-const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcryptjs');
-const { validationResult } = require('express-validator');
-const { CreateUsuarioDto, UpdateUsuarioDto } = require('../dtos/userDTO.js');
+import { PrismaClient } from '../generated/prisma/index.js';
+import bcrypt from 'bcrypt';
+import { CreateUsuarioDto, UpdateUsuarioDto } from '../dto/userDTO.js';
 
 const prisma = new PrismaClient();
 
@@ -108,10 +107,6 @@ class UsuarioController {
    */
   async getUsuarioById(req, res) {
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
 
       const { id } = req.params;
       const usuario = await prisma.usuario.findUnique({
@@ -174,10 +169,7 @@ class UsuarioController {
    */
   async createUsuario(req, res) {
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
+      
 
       const createUsuarioDto = new CreateUsuarioDto(req.body);
       
@@ -216,94 +208,91 @@ class UsuarioController {
   }
 
   /**
- * @swagger
- * /api/usuarios/{id}:
- *   put:
- *     summary: Atualizar usuário por ID
- *     tags: [Usuarios]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               nome:
- *                 type: string
- *               email:
- *                 type: string
- *               id_nivel_acesso:
- *                 type: integer
- *     responses:
- *       200:
- *         description: Usuário atualizado com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Usuario'
- *       400:
- *         description: Erro de validação
- *       404:
- *         description: Usuário não encontrado
- *       409:
- *         description: Email já existe
- *       500:
- *         description: Erro no servidor
- */
-async updateUsuario(req, res) {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+   * @swagger
+   * /api/usuarios/{id}:
+   *   put:
+   *     summary: Atualizar usuário por ID
+   *     tags: [Usuarios]
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               nome:
+   *                 type: string
+   *               email:
+   *                 type: string
+   *               id_nivel_acesso:
+   *                 type: integer
+   *     responses:
+   *       200:
+   *         description: Usuário atualizado com sucesso
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Usuario'
+   *       400:
+   *         description: Erro de validação
+   *       404:
+   *         description: Usuário não encontrado
+   *       409:
+   *         description: Email já existe
+   *       500:
+   *         description: Erro no servidor
+   */
+  async updateUsuario(req, res) {
+    try {
+      
 
-    const { id } = req.params;
-    const updateUsuarioDto = new UpdateUsuarioDto(req.body);
+      const { id } = req.params;
+      const updateUsuarioDto = new UpdateUsuarioDto(req.body);
 
-    // Check if usuario exists
-    const existingUsuario = await prisma.usuario.findUnique({
-      where: { id_usuario: parseInt(id) }
-    });
-
-    if (!existingUsuario) {
-      return res.status(404).json({ error: 'Usuário não encontrado' });
-    }
-
-    // Check if email already exists (if email is being updated)
-    if (updateUsuarioDto.email && updateUsuarioDto.email !== existingUsuario.email) {
-      const emailExists = await prisma.usuario.findUnique({
-        where: { email: updateUsuarioDto.email }
+      // Check if usuario exists
+      const existingUsuario = await prisma.usuario.findUnique({
+        where: { id_usuario: parseInt(id) }
       });
 
-      if (emailExists) {
-        return res.status(409).json({ error: 'Email já existe' });
+      if (!existingUsuario) {
+        return res.status(404).json({ error: 'Usuário não encontrado' });
       }
+
+      // Check if email already exists (if email is being updated)
+      if (updateUsuarioDto.email && updateUsuarioDto.email !== existingUsuario.email) {
+        const emailExists = await prisma.usuario.findUnique({
+          where: { email: updateUsuarioDto.email }
+        });
+
+        if (emailExists) {
+          return res.status(409).json({ error: 'Email já existe' });
+        }
+      }
+
+      const usuario = await prisma.usuario.update({
+        where: { id_usuario: parseInt(id) },
+        data: {
+          nome: updateUsuarioDto.nome,
+          email: updateUsuarioDto.email,
+          id_nivel_acesso: updateUsuarioDto.id_nivel_acesso
+        },
+        include: {
+          nivel_acesso: true
+        }
+      });
+
+      res.json(usuario);
+    } catch (error) {
+      console.error('Error updating usuario:', error);
+      res.status(500).json({ error: 'Falha ao atualizar usuário' });
     }
-
-    const usuario = await prisma.usuario.update({
-      where: { id_usuario: parseInt(id) },
-      data: {
-        nome: updateUsuarioDto.nome,
-        email: updateUsuarioDto.email,
-        id_nivel_acesso: updateUsuarioDto.id_nivel_acesso
-      },
-      include: {
-        nivel_acesso: true
-      }
-    });
-
-    res.json(usuario);
-  } catch (error) {
-    console.error('Error updating usuario:', error);
-    res.status(500).json({ error: 'Falha ao atualizar usuário' });
   }
-}
 
   /**
    * @swagger
@@ -329,10 +318,7 @@ async updateUsuario(req, res) {
    */
   async deleteUsuario(req, res) {
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
+      
 
       const { id } = req.params;
 
@@ -357,4 +343,4 @@ async updateUsuario(req, res) {
   }
 }
 
-module.exports = new UsuarioController();
+export default new UsuarioController();

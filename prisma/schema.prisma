@@ -76,7 +76,6 @@ model Parametro {
   id_estacao        Int
   id_tipo_parametro Int
   descricao         String? @db.Text
-  json              Json    @db.Json
 
   estacao        Estacao       @relation(fields: [id_estacao], references: [id_estacao])
   tipo_parametro TipoParametro @relation(fields: [id_tipo_parametro], references: [id_tipo_parametro])
@@ -93,6 +92,7 @@ model TipoParametro {
   fator             Int?
   polinomio         Decimal? @db.Decimal(10, 8)
   offset            Int?
+  json              Json    @db.Json
 
   parametros Parametro[]
 

@@ -23,9 +23,6 @@ export const createParameterDTO = z.object({
     .positive("O id do tipo de parâmetro deve ser um número inteiro positivo"),
 
   descricao: z.string().optional(),
-  json: z.record(z.any(), {
-    required_error: "O campo json é obrigatório",
-  }),
 });
 
 export const updateParameterDTO = z.object({
