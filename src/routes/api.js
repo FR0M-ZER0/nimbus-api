@@ -1,6 +1,12 @@
 // src/routes/api.js
 import express from 'express';
-import usuarioController from '../controllers/userController.js';
+import {
+  getAllUsuarios,
+  getUsuarioById,
+  createUsuario,
+  updateUsuario,
+  deleteUsuario
+} from '../controllers/userController.js';
 import { 
   validate, 
   createUsuarioSchema,
@@ -60,7 +66,7 @@ const router = express.Router();
  *       500:
  *         description: Erro no servidor
  */
-router.get('/user', usuarioController.getAllUsuarios);
+router.get('/user', getAllUsuarios);
 
 /**
  * @swagger
@@ -86,7 +92,7 @@ router.get('/user', usuarioController.getAllUsuarios);
  *       500:
  *         description: Erro no servidor
  */
-router.get('/user/:id', validate(idParamSchema), usuarioController.getUsuarioById);
+router.get('/user/:id', validate(idParamSchema), getUsuarioById);
 
 /**
  * @swagger
@@ -132,7 +138,7 @@ router.get('/user/:id', validate(idParamSchema), usuarioController.getUsuarioByI
  *       500:
  *         description: Erro no servidor
  */
-router.post('/user', validate(createUsuarioSchema), usuarioController.createUsuario);
+router.post('/user', validate(createUsuarioSchema), createUsuario);
 
 /**
  * @swagger
@@ -178,7 +184,7 @@ router.post('/user', validate(createUsuarioSchema), usuarioController.createUsua
  *       500:
  *         description: Erro no servidor
  */
-router.put('/user/:id', validate(updateUsuarioSchema), usuarioController.updateUsuario);
+router.put('/user/:id', validate(updateUsuarioSchema), updateUsuario);
 
 /**
  * @swagger
@@ -208,6 +214,6 @@ router.put('/user/:id', validate(updateUsuarioSchema), usuarioController.updateU
  *       500:
  *         description: Erro no servidor
  */
-router.delete('/user/:id', validate(idParamSchema), usuarioController.deleteUsuario);
+router.delete('/user/:id', validate(idParamSchema), deleteUsuario);
 
 export default router;
