@@ -1,56 +1,47 @@
-const { body, param, query } = require('express-validator');
+// src/dto/userDTO.js
+import { z } from 'zod';
 
-const usuarioValidationRules = {
-  create: [
-    body('nome')
-      .notEmpty()
-      .withMessage('Nome é obrigatório')
-      .isLength({ min: 2, max: 255 })
-      .withMessage('Nome deve ter entre 2 e 255 caracteres'),
-    body('email')
-      .isEmail()
-      .withMessage('Email válido é obrigatório')
-      .normalizeEmail(),
-    body('senha')
-      .isLength({ min: 6 })
-      .withMessage('Senha deve ter pelo menos 6 caracteres'),
-    body('id_nivel_acesso')
-      .isInt()
-      .withMessage('Nível de acesso é obrigatório')
-  ],
+// Schema para validação do corpo (body) na criação
+const createSchema = z.object({
+  nome: z.string()
+    .min(2, 'Nome deve ter entre 2 e 255 caracteres')
+    .max(255, 'Nome deve ter entre 2 e 255 caracteres'),
+  email: z.string()
+    .email('Email válido é obrigatório'),
+  senha: z.string()
+    .min(6, 'Senha deve ter pelo menos 6 caracteres'),
+  id_nivel_acesso: z.number()
+    .int('Nível de acesso é obrigatório')
+});
 
-  update: [
-    param('id')
-      .isInt()
-      .withMessage('ID do usuário deve ser um número inteiro'),
-    body('nome')
-      .optional()
-      .isLength({ min: 2, max: 255 })
-      .withMessage('Nome deve ter entre 2 e 255 caracteres'),
-    body('email')
-      .optional()
-      .isEmail()
-      .withMessage('Email válido é obrigatório')
-      .normalizeEmail(),
-    body('id_nivel_acesso')
-      .optional()
-      .isInt()
-      .withMessage('Nível de acesso deve ser um número inteiro')
-  ],
+// Schema para validação do corpo (body) na atualização
+const updateSchema = z.object({
+  nome: z.string()
+    .min(2, 'Nome deve ter entre 2 e 255 caracteres')
+    .max(255, 'Nome deve ter entre 2 e 255 caracteres')
+    .optional(),
+  email: z.string()
+    .email('Email válido é obrigatório')
+    .optional(),
+  id_nivel_acesso: z.number()
+    .int('Nível de acesso deve ser um número inteiro')
+    .optional()
+});
 
-  getById: [
-    param('id')
-      .isInt()
-      .withMessage('ID do usuário deve ser um número inteiro')
-  ],
+// Schema para validação de parâmetros (ex: /:id)
+const idParamSchema = z.object({
+  id: z.coerce.number().int('ID do usuário deve ser um número inteiro')
+});
 
-  delete: [
-    param('id')
-      .isInt()
-      .withMessage('ID do usuário deve ser um número inteiro')
-  ]
+// Exporte os schemas
+export const usuarioValidationSchemas = {
+  create: createSchema,
+  update: updateSchema,
+  getById: idParamSchema,
+  delete: idParamSchema
 };
 
+// DTOs (opcional - você pode usar diretamente os schemas do Zod)
 class CreateUsuarioDto {
   constructor(data) {
     this.nome = data.nome;
@@ -68,8 +59,4 @@ class UpdateUsuarioDto {
   }
 }
 
-module.exports = {
-  usuarioValidationRules,
-  CreateUsuarioDto,
-  UpdateUsuarioDto
-};
+export { CreateUsuarioDto, UpdateUsuarioDto };
