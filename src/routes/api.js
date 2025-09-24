@@ -40,6 +40,20 @@ const router = express.Router();
  *         schema:
  *           type: integer
  *           default: 10
+ *       - in: query
+ *         name: sort
+ *         description: Campo para ordenar (nome ou data_criacao)
+ *         schema:
+ *           type: string
+ *           enum: [nome, data_criacao]
+ *           default: data_criacao
+ *       - in: query
+ *         name: order
+ *         description: Ordem de ordenação
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: desc
  *     responses:
  *       200:
  *         description: Lista de usuários
@@ -63,6 +77,8 @@ const router = express.Router();
  *                       type: integer
  *                     pages:
  *                       type: integer
+ *       400:
+ *         description: Parâmetros de ordenação inválidos
  *       500:
  *         description: Erro no servidor
  */

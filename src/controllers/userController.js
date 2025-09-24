@@ -4,58 +4,31 @@ import { CreateUsuarioDto, UpdateUsuarioDto } from '../dto/userDTO.js';
 
 const prisma = new PrismaClient();
 
-/**
- * @swagger
- * /api/usuarios:
- *   get:
- *     summary: Obter todos os usuários
- *     tags: [Usuarios]
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *     responses:
- *       200:
- *         description: Lista de usuários
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 usuarios:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Usuario'
- *                 pagination:
- *                   type: object
- *                   properties:
- *                     page:
- *                       type: integer
- *                     limit:
- *                       type: integer
- *                     total:
- *                       type: integer
- *       500:
- *         description: Erro no servidor
- */
 export const getAllUsuarios = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const sort = req.query.sort || 'data_criacao';
+    const order = (req.query.order || 'desc').toLowerCase();
+
+    const allowedSortFields = ['nome', 'data_criacao'];
+    const allowedOrders = ['asc', 'desc'];
+
+    if (!allowedSortFields.includes(sort)) {
+      return res.status(400).json({ error: `Campo de ordenação inválido. Use: ${allowedSortFields.join(', ')}` });
+    }
+
+    if (!allowedOrders.includes(order)) {
+      return res.status(400).json({ error: "Ordem inválida. Use 'asc' ou 'desc'" });
+    }
+
     const skip = (page - 1) * limit;
 
     const [usuarios, total] = await Promise.all([
       prisma.usuario.findMany({
         skip,
         take: limit,
-        orderBy: { data_criacao: 'desc' },
+        orderBy: { [sort]: order },
         include: { nivel_acesso: true }
       }),
       prisma.usuario.count()
@@ -76,30 +49,6 @@ export const getAllUsuarios = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /api/usuarios/{id}:
- *   get:
- *     summary: Obter usuário por ID
- *     tags: [Usuarios]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Dados do usuário
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Usuario'
- *       404:
- *         description: Usuário não encontrado
- *       500:
- *         description: Erro no servidor
- */
 export const getUsuarioById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -119,46 +68,6 @@ export const getUsuarioById = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /api/usuarios:
- *   post:
- *     summary: Criar um novo usuário
- *     tags: [Usuarios]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - nome
- *               - email
- *               - senha
- *               - id_nivel_acesso
- *             properties:
- *               nome:
- *                 type: string
- *               email:
- *                 type: string
- *               senha:
- *                 type: string
- *               id_nivel_acesso:
- *                 type: integer
- *     responses:
- *       201:
- *         description: Usuário criado com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Usuario'
- *       400:
- *         description: Erro de validação
- *       409:
- *         description: Email já existe
- *       500:
- *         description: Erro no servidor
- */
 export const createUsuario = async (req, res) => {
   try {
     const createUsuarioDto = new CreateUsuarioDto(req.body);
@@ -200,47 +109,6 @@ export const createUsuario = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /api/usuarios/{id}:
- *   put:
- *     summary: Atualizar usuário por ID
- *     tags: [Usuarios]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               nome:
- *                 type: string
- *               email:
- *                 type: string
- *               id_nivel_acesso:
- *                 type: integer
- *     responses:
- *       200:
- *         description: Usuário atualizado com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Usuario'
- *       400:
- *         description: Erro de validação
- *       404:
- *         description: Usuário não encontrado
- *       409:
- *         description: Email já existe
- *       500:
- *         description: Erro no servidor
- */
 export const updateUsuario = async (req, res) => {
   try {
     const { id } = req.params;
@@ -287,28 +155,6 @@ export const updateUsuario = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /api/usuarios/{id}:
- *   delete:
- *     summary: Excluir usuário por ID
- *     tags: [Usuarios]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Usuário excluído com sucesso
- *       400:
- *         description: Erro de validação
- *       404:
- *         description: Usuário não encontrado
- *       500:
- *         description: Erro no servidor
- */
 export const deleteUsuario = async (req, res) => {
   try {
     const { id } = req.params;
