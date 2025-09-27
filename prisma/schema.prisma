@@ -51,7 +51,7 @@ model NivelAcesso {
 }
 
 model Estacao {
-  id_estacao   Int      @id @default(autoincrement())
+  id_estacao   String   @id @db.VarChar(255)
   nome         String   @db.VarChar(255)
   endereco     String?  @db.VarChar(255)
   latitude     Decimal  @db.Decimal(10, 8)
@@ -84,7 +84,7 @@ model TipoParametro {
 
 model Parametro {
   id_parametro      Int      @id @default(autoincrement())
-  id_estacao        Int
+  id_estacao        String
   id_tipo_parametro Int
   descricao         String?  @db.Text
 
@@ -122,7 +122,7 @@ model RegraAlerta {
 model Alerta {
   id_alerta       Int      @id @default(autoincrement())
   id_regra_alerta Int
-  id_estacao      Int
+  id_estacao      String
   id_usuario      Int
   titulo          String   @db.VarChar(255)
   texto           String   @db.Text

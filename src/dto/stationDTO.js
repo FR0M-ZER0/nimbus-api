@@ -2,9 +2,9 @@ import { z } from 'zod';
 import { en, id } from 'zod/locales';
 
 export const createStationDTO = z.object({
-    id_estacao: z.number({
+    id_estacao: z.string({
         required_error: 'O id_estacao é obrigatório.',
-    }).int().positive("O id_estacao deve ser um número inteiro positivo."),
+    }).min(6, { message: 'O UUID da estação deve ter no mínimo 6 caracteres.' }),
 
     nome: z.string({
         required_error: 'O nome da estação é obrigatório.',

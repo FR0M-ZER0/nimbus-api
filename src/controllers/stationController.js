@@ -80,7 +80,7 @@ export const getStationById = async (req, res) => {
     try {
         const { id } = req.params;
         const station = await prisma.estacao.findUnique({
-            where: { id_estacao: parseInt(id) },
+            where: { id_estacao: id },
         });
 
         if (!station) {
@@ -99,7 +99,7 @@ export const updateStation = async (req, res) => {
         const { id } = req.params;
         const validatedData = updateStationDTO.parse(req.body);
         const station = await prisma.estacao.update({
-            where: { id_estacao: parseInt(id) },
+            where: { id_estacao: id },
             data: validatedData,
         });
         res.status(200).json(station);
@@ -127,7 +127,7 @@ export const deleteStation = async (req, res) => {
     try {
         const { id } = req.params;
         await prisma.estacao.delete({
-            where: { id_estacao: parseInt(id) },
+            where: { id_estacao: id },
         });
         res.status(204).send();
     } catch (error) {
