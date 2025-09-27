@@ -8,13 +8,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Operador {
+  MAIOR_QUE // >
+  MENOR_QUE // <
+  IGUAL     // =
+  MENOR_IGUAL // <=
+  MAIOR_IGUAL // >=
+
+  @@map("operador") // O nome do tipo ENUM no banco
+}
+
+enum Gravidade {
+  Alta
+  Media
+  Baixa
+
+  @@map("gravidade") // O nome do tipo ENUM no banco
+}
+
 model Usuario {
   id_usuario      Int      @id @default(autoincrement())
   nome            String   @db.VarChar(255)
   email           String   @unique @db.VarChar(255)
   senha           String   @db.VarChar(255)
   id_nivel_acesso Int
-  data_criacao    DateTime @default(now()) @db.Timestamp(6)
+  data_criacao    DateTime @default(now())
+  ativo           Boolean? 
 
   nivel_acesso NivelAcesso @relation(fields: [id_nivel_acesso], references: [id_nivel_acesso])
   estacoes     Estacao[]
@@ -43,47 +62,41 @@ model Estacao {
 
   usuario    Usuario     @relation(fields: [id_usuario], references: [id_usuario])
   parametros Parametro[]
+  alertas Alerta[]
 
   @@map("estacao")
 }
 
-model Alerta {
-  id_alerta      Int      @id @default(autoincrement())
-  id_tipo_alerta Int
-  id_usuario     Int
-  data_criacao   DateTime @default(now()) @db.Timestamp(6)
-  mensagem       String   @db.Text
+model TipoParametro {
+  id_tipo_parametro Int       @id @default(autoincrement())
+  nome              String    @unique @db.VarChar(100)
+  unidade           String    @db.VarChar(20)
+  fator             Int?
+  polinomio         Decimal?  @db.Decimal(10, 8)
+  offset            Int?
+  json_key          String?   @db.VarChar(50)
 
-  tipo_alerta TipoAlerta @relation(fields: [id_tipo_alerta], references: [id])
-  usuario     Usuario    @relation(fields: [id_usuario], references: [id_usuario])
 
-  @@map("alerta")
-}
+  parametros   Parametro[]
+  regras_aleta RegraAlerta[]
 
-model Medida {
-  id_medida    Int     @id @default(autoincrement())
-  id_parametro Int
-  valor        Decimal @db.Decimal(10, 2)
-  data_hora    Int
-
-  parametro Parametro @relation(fields: [id_parametro], references: [id_parametro])
-
-  @@map("medida")
+  @@map("tipo_parametro")
 }
 
 model Parametro {
-  id_parametro      Int     @id
+  id_parametro      Int      @id @default(autoincrement())
   id_estacao        Int
   id_tipo_parametro Int
   descricao         String? @db.Text
 
+
   estacao        Estacao       @relation(fields: [id_estacao], references: [id_estacao])
   tipo_parametro TipoParametro @relation(fields: [id_tipo_parametro], references: [id_tipo_parametro])
   medidas        Medida[]
-  tipos_alerta   TipoAlerta[]
 
   @@map("parametro")
 }
+
 
 model TipoParametro {
   id_tipo_parametro Int      @id @default(autoincrement())
@@ -94,19 +107,47 @@ model TipoParametro {
   offset            Int?
   json              Json    @db.Json
 
-  parametros Parametro[]
-
-  @@map("tipo_parametro")
-}
-
-model TipoAlerta {
-  id           Int     @id @default(autoincrement())
-  operador     String  @db.VarChar(10)
-  valor        Decimal @db.Decimal(10, 2)
+model Medida {
+  id_medida    Int      @id @default(autoincrement())
   id_parametro Int
+  valor        Decimal  @db.Decimal(10, 2)
+  data_hora    DateTime
+
 
   parametro Parametro @relation(fields: [id_parametro], references: [id_parametro])
-  alertas   Alerta[]
+
+  @@map("medida")
+}
+
+
+model Alerta {
+  id_alerta       Int      @id @default(autoincrement())
+  id_regra_alerta Int
+  id_estacao      Int
+  id_usuario      Int
+  titulo          String   @db.VarChar(255)
+  texto           String   @db.Text
+  data_hora       DateTime
+
+  regra_alerta RegraAlerta @relation(fields: [id_regra_alerta], references: [id_regra_alerta])
+  estacao      Estacao     @relation(fields: [id_estacao], references: [id_estacao])
+  usuario      Usuario     @relation(fields: [id_usuario], references: [id_usuario])
+
 
   @@map("tipo_alerta")
+
+  @@map("alerta")
+}
+model RegraAlerta {
+  id_regra_alerta   Int      @id @default(autoincrement())
+  id_tipo_parametro Int
+  operador          Operador // Usa o ENUM definido no topo
+  valor_limite      Decimal  @db.Decimal(10, 2)
+  gravidade         Gravidade // Usa o ENUM definido no topo
+
+  tipo_parametro TipoParametro @relation(fields: [id_tipo_parametro], references: [id_tipo_parametro])
+  alertas        Alerta[]
+
+  @@map("regra_alerta")
+
 }

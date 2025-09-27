@@ -1,4 +1,3 @@
-// prisma/seed.js
 import { PrismaClient } from '../src/generated/prisma/index.js';
 import bcrypt from 'bcrypt';
 
@@ -7,7 +6,6 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Iniciando o processo de seed...');
 
-  // 1. Garantir níveis de acesso: "Administrador" e "Publico"
   const niveis = ['Administrador', 'Publico'];
   const createdLevels = {};
 
@@ -28,7 +26,6 @@ async function main() {
     createdLevels[descricao] = nivel;
   }
 
-  // 2. Criar usuário admin com senha hasheada
   const hashedPassword = await bcrypt.hash('admin123', 10);
 
   const adminUser = await prisma.usuario.upsert({
@@ -43,7 +40,6 @@ async function main() {
   });
   console.log(`Usuário '${adminUser.nome}' criado/verificado com sucesso.`);
 
-  // Opcional: Criar um usuário público de exemplo
   const publicUser = await prisma.usuario.upsert({
     where: { email: 'publico@example.com' },
     update: {},
@@ -67,3 +63,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   }); 
+
