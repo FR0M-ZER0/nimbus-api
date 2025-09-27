@@ -49,30 +49,6 @@ export const getAllUsuarios = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /api/usuarios/{id}:
- * get:
- * summary: Obter usuário por ID
- * tags: [Usuarios]
- * parameters:
- * - in: path
- * name: id
- * required: true
- * schema:
- * type: integer
- * responses:
- * 200:
- * description: Dados do usuário
- * content:
- * application/json:
- * schema:
- * $ref: '#/components/schemas/Usuario'
- * 404:
- * description: Usuário não encontrado
- * 500:
- * description: Erro no servidor
- */
 export const getUsuarioById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -92,46 +68,6 @@ export const getUsuarioById = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /api/usuarios:
- * post:
- * summary: Criar um novo usuário
- * tags: [Usuarios]
- * requestBody:
- * required: true
- * content:
- * application/json:
- * schema:
- * type: object
- * required:
- * - nome
- * - email
- * - senha
- * - id_nivel_acesso
- * properties:
- * nome:
- * type: string
- * email:
- * type: string
- * senha:
- * type: string
- * id_nivel_acesso:
- * type: integer
- * responses:
- * 201:
- * description: Usuário criado com sucesso
- * content:
- * application/json:
- * schema:
- * $ref: '#/components/schemas/Usuario'
- * 400:
- * description: Erro de validação
- * 409:
- * description: Email já existe
- * 500:
- * description: Erro no servidor
- */
 export const createUsuario = async (req, res) => {
   try {
     const createUsuarioDto = new CreateUsuarioDto(req.body);
@@ -173,47 +109,6 @@ export const createUsuario = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /api/usuarios/{id}:
- * put:
- * summary: Atualizar usuário por ID
- * tags: [Usuarios]
- * parameters:
- * - in: path
- * name: id
- * required: true
- * schema:
- * type: integer
- * requestBody:
- * required: true
- * content:
- * application/json:
- * schema:
- * type: object
- * properties:
- * nome:
- * type: string
- * email:
- * type: string
- * id_nivel_acesso:
- * type: integer
- * responses:
- * 200:
- * description: Usuário atualizado com sucesso
- * content:
- * application/json:
- * schema:
- * $ref: '#/components/schemas/Usuario'
- * 400:
- * description: Erro de validação
- * 404:
- * description: Usuário não encontrado
- * 409:
- * description: Email já existe
- * 500:
- * description: Erro no servidor
- */
 export const updateUsuario = async (req, res) => {
   try {
     const { id } = req.params;
@@ -261,28 +156,6 @@ export const updateUsuario = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /api/usuarios/{id}:
- * delete:
- * summary: Excluir usuário por ID
- * tags: [Usuarios]
- * parameters:
- * - in: path
- * name: id
- * required: true
- * schema:
- * type: integer
- * responses:
- * 200:
- * description: Usuário excluído com sucesso
- * 400:
- * description: Erro de validação
- * 404:
- * description: Usuário não encontrado
- * 500:
- * description: Erro no servidor
- */
 export const deleteUsuario = async (req, res) => {
   try {
     const { id } = req.params;

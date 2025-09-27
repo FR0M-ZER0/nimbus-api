@@ -4,7 +4,14 @@ const router = express.Router()
 // controllers
 import { healthCheck } from '../controllers/healthCheckController.js'
 
-import usuarioController from '../controllers/userController.js';
+import {
+    createUsuario,
+    getAllUsuarios,
+    deleteUsuario,
+    getUsuarioById,
+    updateUsuario
+} from '../controllers/userController.js'
+
 import { 
   validate, 
   createUsuarioSchema,
@@ -306,7 +313,11 @@ router.get('/parameters/:id', getParameterById)
  *   put:
  *     summary: Atualiza um parâmetro existente pelo seu ID
  *     tags: [Parameters]
-
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
  *             type: object
  *             required:
  *               - nome
@@ -339,45 +350,6 @@ router.get('/parameters/:id', getParameterById)
  *         description: Email já existe
  *       500:
  *         description: Erro no servidor
- */
-router.post('/user', validate(createUsuarioSchema), createUsuario);
-
-/**
- * @swagger
- * /api/user/{id}:
- *   put:
- *     summary: Atualizar usuário por ID
- *     tags: [Usuarios]
-
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
-
- *         description: O ID do parâmetro a ser atualizado.
-
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
-
- *             $ref: '#/components/schemas/Parameter'
- *     responses:
- *       200:
- *         description: Parâmetro atualizado com sucesso.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Parameter'
- *       400:
- *         description: Erro de validação nos dados enviados.
- *       404:
- *         description: Parâmetro com o ID especificado não foi encontrado.
- *       500:
- *         description: Erro interno do servidor ao atualizar o parâmetro.
  */
 router.put('/parameters/:id', updateParameter)
 
@@ -460,7 +432,7 @@ router.delete("/typeParameters/:id", deleteTipoParametro);
  *       500:
  *         description: Erro no servidor
  */
-router.get('/user', usuarioController.getAllUsuarios);
+router.get('/user', getAllUsuarios);
 
 /**
  * @swagger
@@ -486,7 +458,7 @@ router.get('/user', usuarioController.getAllUsuarios);
  *       500:
  *         description: Erro no servidor
  */
-router.get('/user/:id', validate(idParamSchema), usuarioController.getUsuarioById);
+router.get('/user/:id', validate(idParamSchema), getUsuarioById);
 
 /**
  * @swagger
@@ -532,7 +504,7 @@ router.get('/user/:id', validate(idParamSchema), usuarioController.getUsuarioByI
  *       500:
  *         description: Erro no servidor
  */
-router.post('/user', validate(createUsuarioSchema), usuarioController.createUsuario);
+router.post('/user', validate(createUsuarioSchema), createUsuario);
 
 /**
  * @swagger
@@ -551,38 +523,6 @@ router.post('/user', validate(createUsuarioSchema), usuarioController.createUsua
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               nome:
- *                 type: string
- *                 example: "João Atualizado"
- *               email:
- *                 type: string
- *                 example: "joao.novo@example.com"
- *               id_nivel_acesso:
- *                 type: integer
- *                 example: 2
- *     responses:
- *       200:
- *         description: Usuário atualizado com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Usuario'
- *       400:
- *         description: Erro de validação
- *       404:
- *         description: Usuário não encontrado
- *       409:
- *         description: Email já existe
- *       500:
- *         description: Erro no servidor
- */
-router.put('/user/:id', validate(updateUsuarioSchema), usuarioController.updateUsuario);
-
-/**
- * @swagger
-
  *             type: object
  *             properties:
  *               nome:
@@ -642,7 +582,7 @@ router.put('/user/:id', validate(updateUsuarioSchema), updateUsuario);
  *         description: Erro no servidor
  */
 
-router.delete('/user/:id', validate(idParamSchema), usuarioController.deleteUsuario);
+router.delete('/user/:id', validate(idParamSchema), deleteUsuario);
 
 
 
