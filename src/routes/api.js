@@ -102,104 +102,95 @@ router.get('/health', healthCheck)
 *         description: Erro ao criar a estação
 */
 router.post('/stations', createStation)
-
-
-/**
- * @swagger
- * tags:
- *   name: Usuarios
- *   description: Operações relacionadas a usuários
- */
-
-/**
- * @swagger
- * /api/user:
- *   get:
- *     summary: Obter todos os usuários
- *     tags: [Usuarios]
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *       - in: query
- *         name: sort
- *         description: Campo para ordenar (nome ou data_criacao)
- *         schema:
- *           type: string
- *           enum: [nome, data_criacao]
- *           default: data_criacao
- *       - in: query
- *         name: order
- *         description: Ordem de ordenação
- *         schema:
- *           type: string
- *           enum: [asc, desc]
- *           default: desc
- *     responses:
- *       200:
- *         description: Lista de usuários
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 usuarios:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Usuario'
- *                 pagination:
- *                   type: object
- *                   properties:
- *                     page:
- *                       type: integer
- *                     limit:
- *                       type: integer
- *                     total:
- *                       type: integer
- *                     pages:
- *                       type: integer
- *       400:
- *         description: Parâmetros de ordenação inválidos
- *       500:
- *         description: Erro no servidor
- */
-router.get('/user', getAllUsuarios);
-
-/**
- * @swagger
- * /api/user/{id}:
- *   get:
- *     summary: Obter usuário por ID
- *     tags: [Usuarios]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Dados do usuário
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Usuario'
- *       404:
- *         description: Usuário não encontrado
- *       500:
- *         description: Erro no servidor
- */
-router.get('/user/:id', validate(idParamSchema), getUsuarioById);
-
 /**
 
+/**
+* @swagger
+* /stations:
+*   get:
+*     summary: Lista todas as estações
+*     responses:
+*       200:
+*         description: Lista de estações
+*       500:
+*         description: Erro ao buscar as estações
+*/
+router.get('/stations', getAllStations)
+
+/**
+* @swagger
+* /stations/{id}:
+*   get:
+*     summary: Busca uma estação pelo id
+*     parameters:
+*       - in: path
+*         name: id
+*         required: true
+*         schema:
+*           type: integer
+*         description: ID da estação
+*     responses:
+*       200:
+*         description: Estação encontrada
+*       404:
+*         description: Estação não encontrada
+*       500:
+*         description: Erro ao buscar a estação
+*/
+router.get('/stations/:id', getStationById)
+
+/**
+* @swagger
+* /stations/{id}:
+*   put:
+*     summary: Atualiza uma estação pelo id
+*     parameters:
+*       - in: path
+*         name: id
+*         required: true
+*         schema:
+*           type: integer
+*         description: ID da estação
+*     requestBody:
+*       required: true
+*       content:
+*         application/json:
+*           schema:
+*             type: object
+*             properties: 
+*               id_estacao:
+*                 type: integer
+*                 example: 1
+*               nome:
+*                 type: string
+*                 example: Estação Central
+*               endereco:
+*                 type: string
+*                 example: Rua Principal, 123
+*               latitude:
+*                 type: number
+*                 format: float
+*                 example: -23.55052
+*               longitude:
+*                 type: number
+*                 format: float
+*                 example: -46.63342
+*               id_usuario:
+*                 type: integer
+*                 example: 1
+*     responses:
+*       200:
+*         description: Estação atualizada com sucesso
+*       400:
+*         description: Erro de validação
+*       404:
+*         description: Estação não encontrada
+*       500:
+*         description: Erro ao atualizar a estação
+*/
+router.put('/stations/:id', updateStation)
+
+/**
 * @swagger
 * /stations/{id}:
 *   delete:
@@ -220,8 +211,7 @@ router.get('/user/:id', validate(idParamSchema), getUsuarioById);
 *         description: Erro ao deletar a estação
 */
 router.delete('/stations/:id', deleteStation)
-
-
+/**
 // Parameters
 
 /**
