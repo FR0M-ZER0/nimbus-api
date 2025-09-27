@@ -87,7 +87,8 @@ model Parametro {
   id_parametro      Int      @id @default(autoincrement())
   id_estacao        Int
   id_tipo_parametro Int
-  descricao         String?  @db.Text
+  descricao         String? @db.Text
+
 
   estacao        Estacao       @relation(fields: [id_estacao], references: [id_estacao])
   tipo_parametro TipoParametro @relation(fields: [id_tipo_parametro], references: [id_tipo_parametro])
@@ -96,11 +97,22 @@ model Parametro {
   @@map("parametro")
 }
 
+
+model TipoParametro {
+  id_tipo_parametro Int      @id @default(autoincrement())
+  nome              String   @db.VarChar(100)
+  unidade           String   @db.VarChar(20)
+  fator             Int?
+  polinomio         Decimal? @db.Decimal(10, 8)
+  offset            Int?
+  json              Json    @db.Json
+
 model Medida {
   id_medida    Int      @id @default(autoincrement())
   id_parametro Int
   valor        Decimal  @db.Decimal(10, 2)
   data_hora    DateTime
+
 
   parametro Parametro @relation(fields: [id_parametro], references: [id_parametro])
 
@@ -121,6 +133,9 @@ model Alerta {
   estacao      Estacao     @relation(fields: [id_estacao], references: [id_estacao])
   usuario      Usuario     @relation(fields: [id_usuario], references: [id_usuario])
 
+
+  @@map("tipo_alerta")
+
   @@map("alerta")
 }
 model RegraAlerta {
@@ -134,4 +149,5 @@ model RegraAlerta {
   alertas        Alerta[]
 
   @@map("regra_alerta")
+
 }
