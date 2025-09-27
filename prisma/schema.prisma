@@ -72,7 +72,7 @@ model TipoParametro {
   nome              String    @unique @db.VarChar(100)
   unidade           String    @db.VarChar(20)
   fator             Int?
-  polinomio         Decimal?  @db.Decimal(10, 8)
+  polinomio         String?  @db.VarChar(50)
   offset            Int?
   json              Json?     @db.Json
 
