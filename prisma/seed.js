@@ -1,45 +1,69 @@
 // prisma/seed.js
 import { PrismaClient } from '../src/generated/prisma/index.js';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-    console.log('Iniciando o processo de seed...');
+  console.log('Iniciando o processo de seed...');
 
-    // 1. Criar um Nível de Acesso (se não existir)
-    const adminLevel = await prisma.nivelAcesso.upsert({
-        where: { id_nivel_acesso: 1 }, // Tenta encontrar pelo ID 1
-        update: {}, // Se encontrar, não faz nada
-        create: { // Se não encontrar, cria
-            id_nivel_acesso: 1,
-            descricao: 'Administrador'
-        },
+  // 1. Garantir níveis de acesso: "Administrador" e "Publico"
+  const niveis = ['Administrador', 'Publico'];
+  const createdLevels = {};
+
+  for (const descricao of niveis) {
+    let nivel = await prisma.nivelAcesso.findFirst({
+      where: { descricao }
     });
-    console.log(`Nível de acesso '${adminLevel.descricao}' garantido.`);
 
-    // 2. Criar um Usuário Administrador
-    const adminUser = await prisma.usuario.upsert({
-        where: { email: 'admin@example.com' }, // Tenta encontrar pelo email
-        update: {}, // Se encontrar, não faz nada
-        create: {
-            nome: 'Admin',
-            email: 'admin@example.com',
-            // Em um app real, a senha deve ser criptografada (hash)
-            // Para o seed, vamos usar uma senha simples
-            senha: 'admin123', 
-            id_nivel_acesso: adminLevel.id_nivel_acesso, // Associa ao nível de acesso criado
-        },
-    });
-    console.log(`Usuário '${adminUser.nome}' criado com sucesso.`);
+    if (!nivel) {
+      nivel = await prisma.nivelAcesso.create({
+        data: { descricao }
+      });
+      console.log(`Nível de acesso '${descricao}' criado com ID ${nivel.id_nivel_acesso}.`);
+    } else {
+      console.log(`Nível de acesso '${descricao}' já existe com ID ${nivel.id_nivel_acesso}.`);
+    }
 
-    console.log('Seed finalizado.');
+    createdLevels[descricao] = nivel;
+  }
+
+  // 2. Criar usuário admin com senha hasheada
+  const hashedPassword = await bcrypt.hash('admin123', 10);
+
+  const adminUser = await prisma.usuario.upsert({
+    where: { email: 'admin@example.com' },
+    update: {},
+    create: {
+      nome: 'Admin',
+      email: 'admin@example.com',
+      senha: hashedPassword,
+      id_nivel_acesso: createdLevels['Administrador'].id_nivel_acesso,
+    },
+  });
+  console.log(`Usuário '${adminUser.nome}' criado/verificado com sucesso.`);
+
+  // Opcional: Criar um usuário público de exemplo
+  const publicUser = await prisma.usuario.upsert({
+    where: { email: 'publico@example.com' },
+    update: {},
+    create: {
+      nome: 'Usuário Público',
+      email: 'publico@example.com',
+      senha: await bcrypt.hash('public123', 10),
+      id_nivel_acesso: createdLevels['Publico'].id_nivel_acesso,
+    },
+  });
+  console.log(`Usuário público '${publicUser.nome}' criado/verificado com sucesso.`);
+
+  console.log('Seed finalizado com sucesso.');
 }
 
 main()
-    .catch((e) => {
-        console.error(e);
-        process.exit(1);
-    })
-    .finally(async () => {
-        await prisma.$disconnect();
-    });
+  .catch((e) => {
+    console.error('Erro no seed:', e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

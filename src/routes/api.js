@@ -1,181 +1,235 @@
-import express from 'express'
-const router = express.Router()
-
-// controllers
-import { healthCheck } from '../controllers/healthCheckController.js'
+// src/routes/api.js
+import express from 'express';
 import {
-    createStation,
-    getAllStations,
-    getStationById,
-    updateStation,
-    deleteStation
-} from '../controllers/stationController.js'
+  getAllUsuarios,
+  getUsuarioById,
+  createUsuario,
+  updateUsuario,
+  deleteUsuario
+} from '../controllers/userController.js';
+import { 
+  validate, 
+  createUsuarioSchema,
+  updateUsuarioSchema,
+  idParamSchema 
+} from '../validations/userValidation.js';
 
-// Health Check
-
-/**
-* @swagger
-* /health:
-*   get:
-*     summary: Retorna o estado atual do servidor
-*     responses:
-*       200:
-*         description: Data e horário do servidor
-*/
-router.get('/health', healthCheck)
-
-// Stations
+const router = express.Router();
 
 /**
-* @swagger
-* /stations:
-*   post:
-*     summary: Cria uma nova estação
-*     requestBody:
-*       required: true
-*       content:
-*         application/json:
-*           schema:
-*             type: object
-*             properties:
-*               id_estacao:
-*                 type: integer
-*                 example: 1
-*               nome:
-*                 type: string
-*                 example: Estação Central
-*               endereco:
-*                 type: string
-*                 example: Rua Principal, 123
-*               latitude:
-*                 type: number
-*                 format: float
-*                 example: -23.55052
-*               longitude:
-*                 type: number  
-*                 format: float
-*                 example: -46.63342
-*               id_usuario:
-*                 type: integer
-*                 example: 1
-*     responses:
-*       201:
-*         description: Estação criada com sucesso
-*       400:
-*         description: Erro de validação
-*       409:
-*         description: Conflito - Estação com este id_estacao já existe
-*       500:
-*         description: Erro ao criar a estação
-*/
-router.post('/stations', createStation)
+ * @swagger
+ * tags:
+ *   name: Usuarios
+ *   description: Operações relacionadas a usuários
+ */
 
 /**
-* @swagger
-* /stations:
-*   get:
-*     summary: Lista todas as estações
-*     responses:
-*       200:
-*         description: Lista de estações
-*       500:
-*         description: Erro ao buscar as estações
-*/
-router.get('/stations', getAllStations)
+ * @swagger
+ * /api/user:
+ *   get:
+ *     summary: Obter todos os usuários
+ *     tags: [Usuarios]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *       - in: query
+ *         name: sort
+ *         description: Campo para ordenar (nome ou data_criacao)
+ *         schema:
+ *           type: string
+ *           enum: [nome, data_criacao]
+ *           default: data_criacao
+ *       - in: query
+ *         name: order
+ *         description: Ordem de ordenação
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: desc
+ *     responses:
+ *       200:
+ *         description: Lista de usuários
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 usuarios:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Usuario'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     pages:
+ *                       type: integer
+ *       400:
+ *         description: Parâmetros de ordenação inválidos
+ *       500:
+ *         description: Erro no servidor
+ */
+router.get('/user', getAllUsuarios);
 
 /**
-* @swagger
-* /stations/{id}:
-*   get:
-*     summary: Busca uma estação pelo id
-*     parameters:
-*       - in: path
-*         name: id
-*         required: true
-*         schema:
-*           type: integer
-*         description: ID da estação
-*     responses:
-*       200:
-*         description: Estação encontrada
-*       404:
-*         description: Estação não encontrada
-*       500:
-*         description: Erro ao buscar a estação
-*/
-router.get('/stations/:id', getStationById)
+ * @swagger
+ * /api/user/{id}:
+ *   get:
+ *     summary: Obter usuário por ID
+ *     tags: [Usuarios]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Dados do usuário
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Usuario'
+ *       404:
+ *         description: Usuário não encontrado
+ *       500:
+ *         description: Erro no servidor
+ */
+router.get('/user/:id', validate(idParamSchema), getUsuarioById);
 
 /**
-* @swagger
-* /stations/{id}:
-*   put:
-*     summary: Atualiza uma estação pelo id
-*     parameters:
-*       - in: path
-*         name: id
-*         required: true
-*         schema:
-*           type: integer
-*         description: ID da estação
-*     requestBody:
-*       required: true
-*       content:
-*         application/json:
-*           schema:
-*             type: object
-*             properties: 
-*               id_estacao:
-*                 type: integer
-*                 example: 1
-*               nome:
-*                 type: string
-*                 example: Estação Central
-*               endereco:
-*                 type: string
-*                 example: Rua Principal, 123
-*               latitude:
-*                 type: number
-*                 format: float
-*                 example: -23.55052
-*               longitude:
-*                 type: number
-*                 format: float
-*                 example: -46.63342
-*               id_usuario:
-*                 type: integer
-*                 example: 1
-*     responses:
-*       200:
-*         description: Estação atualizada com sucesso
-*       400:
-*         description: Erro de validação
-*       404:
-*         description: Estação não encontrada
-*       500:
-*         description: Erro ao atualizar a estação
-*/
-router.put('/stations/:id', updateStation)
+ * @swagger
+ * /api/user:
+ *   post:
+ *     summary: Criar um novo usuário
+ *     tags: [Usuarios]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nome
+ *               - email
+ *               - senha
+ *               - id_nivel_acesso
+ *             properties:
+ *               nome:
+ *                 type: string
+ *                 example: "João Silva"
+ *               email:
+ *                 type: string
+ *                 example: "joao@example.com"
+ *               senha:
+ *                 type: string
+ *                 example: "minhasenha123"
+ *               id_nivel_acesso:
+ *                 type: integer
+ *                 example: 1
+ *     responses:
+ *       201:
+ *         description: Usuário criado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Usuario'
+ *       400:
+ *         description: Erro de validação
+ *       409:
+ *         description: Email já existe
+ *       500:
+ *         description: Erro no servidor
+ */
+router.post('/user', validate(createUsuarioSchema), createUsuario);
 
 /**
-* @swagger
-* /stations/{id}:
-*   delete:
-*     summary: Deleta uma estação pelo id
-*     parameters:
-*       - in: path
-*         name: id
-*         required: true
-*         schema:
-*           type: integer
-*         description: ID da estação
-*     responses:
-*       204:
-*         description: Estação deletada com sucesso
-*       404:
-*         description: Estação não encontrada
-*       500:
-*         description: Erro ao deletar a estação
-*/
-router.delete('/stations/:id', deleteStation)
+ * @swagger
+ * /api/user/{id}:
+ *   put:
+ *     summary: Atualizar usuário por ID
+ *     tags: [Usuarios]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nome:
+ *                 type: string
+ *                 example: "João Atualizado"
+ *               email:
+ *                 type: string
+ *                 example: "joao.novo@example.com"
+ *               id_nivel_acesso:
+ *                 type: integer
+ *                 example: 2
+ *     responses:
+ *       200:
+ *         description: Usuário atualizado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Usuario'
+ *       400:
+ *         description: Erro de validação
+ *       404:
+ *         description: Usuário não encontrado
+ *       409:
+ *         description: Email já existe
+ *       500:
+ *         description: Erro no servidor
+ */
+router.put('/user/:id', validate(updateUsuarioSchema), updateUsuario);
 
-export default router
+/**
+ * @swagger
+ * /api/user/{id}:
+ *   delete:
+ *     summary: Excluir usuário por ID
+ *     tags: [Usuarios]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Usuário excluído com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Usuário excluído com sucesso"
+ *       404:
+ *         description: Usuário não encontrado
+ *       500:
+ *         description: Erro no servidor
+ */
+router.delete('/user/:id', validate(idParamSchema), deleteUsuario);
+
+export default router;
