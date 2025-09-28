@@ -81,11 +81,19 @@ export const getStationById = async (req, res) => {
         const { id } = req.params;
         const station = await prisma.estacao.findUnique({
             where: { id_estacao: id },
+            include: {
+                parametros: {
+                include: {
+                    tipo_parametro: true,
+                },
+                },
+            },
         });
 
         if (!station) {
             return res.status(404).json({ message: "Estação não encontrada" });
         }
+
         res.status(200).json(station);
     } catch (error) {
         console.error(error);
