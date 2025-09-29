@@ -37,7 +37,8 @@ model Usuario {
 
   nivel_acesso NivelAcesso @relation(fields: [id_nivel_acesso], references: [id_nivel_acesso])
   estacoes     Estacao[]
-  alertas      Alerta[]
+  alertaUsuarios AlertaUsuario[]
+  alarmes       Alarme[]
 
   @@map("usuarios")
 }
@@ -62,7 +63,6 @@ model Estacao {
 
   usuario    Usuario     @relation(fields: [id_usuario], references: [id_usuario])
   parametros Parametro[]
-  alertas    Alerta[]
 
   @@map("estacao")
 }
@@ -72,12 +72,11 @@ model TipoParametro {
   nome              String    @unique @db.VarChar(100)
   unidade           String    @db.VarChar(20)
   fator             Int?
-  polinomio         String?  @db.VarChar(50)
+  polinomio         String?   @db.VarChar(50)
   offset            Int?
   json              Json?     @db.Json
 
   parametros Parametro[]
-  alertas    Alerta[]
 
   @@map("tipo_parametro")
 }
@@ -91,6 +90,7 @@ model Parametro {
   estacao        Estacao       @relation(fields: [id_estacao], references: [id_estacao])
   tipo_parametro TipoParametro @relation(fields: [id_tipo_parametro], references: [id_tipo_parametro])
   medidas        Medida[]
+  alertas        Alerta[]
 
   @@map("parametro")
 }
@@ -102,7 +102,7 @@ model Medida {
   data_hora    DateTime @default(now())
 
   parametro Parametro @relation(fields: [id_parametro], references: [id_parametro])
-  alertas   Alerta[]
+  alarmes   Alarme[]
 
   @@map("medida")
 }
@@ -117,21 +117,43 @@ model TipoAlerta {
 }
 
 model Alerta {
-  id_alerta        Int      @id @default(autoincrement())
-  id_estacao       String
-  id_usuario       Int
-  titulo           String   @db.VarChar(255)
-  texto            String   @db.Text
-  data_hora        DateTime @default(now())
+  id_alerta        Int       @id @default(autoincrement())
+  titulo           String    @db.VarChar(255)
+  texto            String    @db.Text
+  data_hora        DateTime  @default(now())
   id_tipo_alerta   Int?
-  id_medida        Int?
-  id_tipo_parametro Int?
+  id_parametro     Int?
 
-  estacao        Estacao       @relation(fields: [id_estacao], references: [id_estacao])
-  usuario        Usuario       @relation(fields: [id_usuario], references: [id_usuario])
-  tipo_alerta    TipoAlerta?   @relation(fields: [id_tipo_alerta], references: [id])
-  medida         Medida?       @relation(fields: [id_medida], references: [id_medida])
-  tipo_parametro TipoParametro? @relation(fields: [id_tipo_parametro], references: [id_tipo_parametro])
+  tipo_alerta    TipoAlerta? @relation(fields: [id_tipo_alerta], references: [id])
+  parametro      Parametro?  @relation(fields: [id_parametro], references: [id_parametro])
+  alertaUsuarios AlertaUsuario[]
+  alarmes        Alarme[]
 
   @@map("alerta")
+}
+
+model AlertaUsuario {
+  id_usuario Int
+  id_alerta  Int
+  created_at DateTime @default(now())
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+  alerta  Alerta  @relation(fields: [id_alerta], references: [id_alerta])
+
+  @@id([id_usuario, id_alerta])
+  @@map("alerta_usuario")
+}
+
+model Alarme {
+  id_usuario Int
+  id_medida  Int
+  id_alerta  Int
+  created_at DateTime @default(now())
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+  medida  Medida  @relation(fields: [id_medida], references: [id_medida])
+  alerta  Alerta  @relation(fields: [id_alerta], references: [id_alerta])
+
+  @@id([id_usuario, id_medida, id_alerta])
+  @@map("alarme")
 }
