@@ -66,6 +66,8 @@ import {
   deleteTipoAlerta,
 } from "../controllers/alertTypeController.js";
 
+import { login } from '../controllers/authController.js';
+
 
 // Health Check
 
@@ -745,6 +747,8 @@ router.get("/alert-type", getAllTipoAlertas)
 router.get("/alert-type/:id", getTipoAlertaById)
 router.put("/alert-type/:id", updateTipoAlerta)
 router.delete("/alert-type/:id", deleteTipoAlerta)
+
+router.post("/login", login)
 
 export default router
 
