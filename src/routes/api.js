@@ -19,6 +19,14 @@ import {
   idParamSchema 
 } from '../validations/userValidation.js';
 
+import { 
+  createAlerta,
+  getAllAlertas,
+  getAlertaById,
+  updateAlerta,
+  deleteAlerta,
+} from '../controllers/alertaController.js';
+
 import {
     createStation,
     getAllStations,
@@ -544,7 +552,6 @@ router.put('/user/:id', validate(updateUsuarioSchema), updateUsuario);
 
 /**
  * @swagger
-
  * /api/user/{id}:
  *   delete:
  *     summary: Excluir usuário por ID
@@ -573,8 +580,153 @@ router.put('/user/:id', validate(updateUsuarioSchema), updateUsuario);
  */
 
 router.delete('/user/:id', validate(idParamSchema), deleteUsuario);
+// Alertas
+/**
+ * @swagger
+ * tags:
+ *   name: Alertas
+ *   description: Operações relacionadas a Alertas
+ */
 
+/**
+* @swagger
+* /alerts:
+*   post:
+*     summary: Cria uma nova estação
+*     tags: [Alertas]
+*     requestBody:
+*       required: true
+*       content:
+*         application/json:
+*           schema:
+*             type: object
+*             properties:
+*               id_tipo_alerta:
+*                 type: integer
+*                 example: 1
+*               id_usuario:
+*                 type: integer
+*                 example: 1
+*               mensagem:
+*                 type: string
+*                 example: A temperatura da estufa B atingiu um nível crítico.
+*     responses:
+*       201:
+*         description: json novoAlerta
+*       400:
+*         description: Erro de validação
+*       409:
+*         description: Falha na restrição de chave estrangeira
+*       500:
+*         description: Erro ao criar o alerta
+*/
+router.post('/alerts',createAlerta)
 
+/**
+  * @swagger
+* /alerts:
+*   get:
+*     summary: Lista todos os alertas
+*     tags: [Alertas]
+*     responses:
+*       200:
+*         description: Lista de Alerta
+*       500:
+*         description: Erro ao buscar os alertas
+*/
+
+router.get('/alerts',getAllAlertas)
+
+/**
+* @swagger
+* /alerts/{id}:
+*   get:
+*     summary: Busca uma estação pelo id
+*     tags: [Alertas]
+*     parameters:
+*       - in: path
+*         name: id
+*         required: true
+*         schema:
+*           type: integer
+*         description: ID da estação
+*     responses:
+*       200:
+*         description: Estação encontrada
+*       404:
+*         description: Estação não encontrada
+*       500:
+*         description: Erro ao buscar a estação
+*/
+router.get('/alerts/:id',getAlertaById)
+
+/**
+* @swagger
+* /alerts/{id}:
+*   put:
+*     summary: Atualiza uma estação pelo id
+*     tags: [Alertas]
+*     parameters:
+*       - in: path
+*         name: id
+*         required: true
+*         schema:
+*           type: integer
+*         description: ID da estação
+*     requestBody:
+*       required: true
+*       content:
+*         application/json:
+*           schema:
+*             type: object
+*             properties: 
+*               mensagem:
+*                 type: string
+*                 example: Mensagem do Alerta atualiazada
+*               id_tipo_alerta:
+*                 type: int
+*                 example: 2
+*     responses:
+*       200:
+*         description: json novaEstação
+*       400:
+*         description: Erro de validação
+*       404:
+*         description: Alerta não encontrado
+*       500:
+*         description: Erro ao atualizar o alerta
+*/
+router.put('/alerts/:id',updateAlerta)
+/**
+* @swagger
+* /alerts/{id}:
+*   delete:
+*     summary: Deleta uma estação pelo id
+*     tags: [Alertas]
+*     parameters:
+*       - in: path
+*         name: id
+*         required: true
+*         schema:
+*           type: integer
+*         description: ID da estação
+*     responses:
+*       204:
+*         description: Estação deletada com sucesso
+*       404:
+*         description: Estação não encontrada
+*       500:
+*         description: Erro ao deletar a estação
+*/
+router.delete('/alerts/:id',deleteAlerta)
+
+// export default router
+
+// router.post('/alerts',createAlerta)
+// router.get('/alerts',getAllAlertas)
+// router.get('/alerts/:id',getAlertaById)
+// router.put('/alerts/:id',updateAlerta)
+// router.delete('/alerts/:id',deleteAlerta)
 
 export default router
 
