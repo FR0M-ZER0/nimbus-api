@@ -8,13 +8,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Operador {
+  MAIOR_QUE
+  MENOR_QUE
+  IGUAL
+  MENOR_IGUAL
+  MAIOR_IGUAL
+
+  @@map("operador")
+}
+
+enum Gravidade {
+  Alta
+  Media
+  Baixa
+
+  @@map("gravidade")
+}
+
 model Usuario {
   id_usuario      Int      @id @default(autoincrement())
   nome            String   @db.VarChar(255)
   email           String   @unique @db.VarChar(255)
   senha           String   @db.VarChar(255)
   id_nivel_acesso Int
-  data_criacao    DateTime @default(now()) @db.Timestamp(6)
+  data_criacao    DateTime @default(now())
+  ativo           Boolean?
 
   nivel_acesso NivelAcesso @relation(fields: [id_nivel_acesso], references: [id_nivel_acesso])
   estacoes     Estacao[]
@@ -32,7 +51,7 @@ model NivelAcesso {
 }
 
 model Estacao {
-  id_estacao   Int      @id
+  id_estacao   String   @id @db.VarChar(255)
   nome         String   @db.VarChar(255)
   endereco     String?  @db.VarChar(255)
   latitude     Decimal  @db.Decimal(10, 8)
@@ -43,71 +62,76 @@ model Estacao {
 
   usuario    Usuario     @relation(fields: [id_usuario], references: [id_usuario])
   parametros Parametro[]
+  alertas    Alerta[]
 
   @@map("estacao")
 }
 
-model Alerta {
-  id_alerta      Int      @id @default(autoincrement())
-  id_tipo_alerta Int
-  id_usuario     Int
-  data_criacao   DateTime @default(now()) @db.Timestamp(6)
-  mensagem       String   @db.Text
-
-  tipo_alerta TipoAlerta @relation(fields: [id_tipo_alerta], references: [id])
-  usuario     Usuario    @relation(fields: [id_usuario], references: [id_usuario])
-
-  @@map("alerta")
-}
-
-model Medida {
-  id_medida    Int     @id @default(autoincrement())
-  id_parametro Int
-  
-  valor        Decimal @db.Decimal(10, 2)
-  data_hora    Int
-
-  parametro Parametro @relation(fields: [id_parametro], references: [id_parametro])
-
-  @@map("medida")
-}
-
-model Parametro {
-  id_parametro      Int     @id
-  id_estacao        Int
-  id_tipo_parametro Int
-  descricao         String? @db.Text
-  json              Json    @db.Json
-
-  estacao        Estacao       @relation(fields: [id_estacao], references: [id_estacao])
-  tipo_parametro TipoParametro @relation(fields: [id_tipo_parametro], references: [id_tipo_parametro])
-  medidas        Medida[]
-  tipos_alerta   TipoAlerta[]
-
-  @@map("parametro")
-}
-
 model TipoParametro {
-  id_tipo_parametro Int      @id @default(autoincrement())
-  nome              String   @db.VarChar(100)
-  unidade           String   @db.VarChar(20)
+  id_tipo_parametro Int       @id @default(autoincrement())
+  nome              String    @unique @db.VarChar(100)
+  unidade           String    @db.VarChar(20)
   fator             Int?
-  polinomio         Decimal? @db.Decimal(10, 8)
+  polinomio         String?  @db.VarChar(50)
   offset            Int?
+  json              Json?     @db.Json
 
   parametros Parametro[]
+  alertas    Alerta[]
 
   @@map("tipo_parametro")
 }
 
-model TipoAlerta {
-  id           Int     @id @default(autoincrement())
-  operador     String  @db.VarChar(10)
-  valor        Decimal @db.Decimal(10, 2)
+model Parametro {
+  id_parametro      Int      @id @default(autoincrement())
+  id_estacao        String
+  id_tipo_parametro Int
+  descricao         String?  @db.Text
+
+  estacao        Estacao       @relation(fields: [id_estacao], references: [id_estacao])
+  tipo_parametro TipoParametro @relation(fields: [id_tipo_parametro], references: [id_tipo_parametro])
+  medidas        Medida[]
+
+  @@map("parametro")
+}
+
+model Medida {
+  id_medida    Int      @id @default(autoincrement())
   id_parametro Int
+  valor        Decimal  @db.Decimal(10, 2)
+  data_hora    DateTime @default(now())
 
   parametro Parametro @relation(fields: [id_parametro], references: [id_parametro])
   alertas   Alerta[]
 
+  @@map("medida")
+}
+
+model TipoAlerta {
+  id       Int     @id @default(autoincrement())
+  operador String  @db.VarChar(10)
+  valor    Decimal @db.Decimal(10, 2)
+  alertas  Alerta[]
+
   @@map("tipo_alerta")
+}
+
+model Alerta {
+  id_alerta        Int      @id @default(autoincrement())
+  id_estacao       String
+  id_usuario       Int
+  titulo           String   @db.VarChar(255)
+  texto            String   @db.Text
+  data_hora        DateTime @default(now())
+  id_tipo_alerta   Int?
+  id_medida        Int?
+  id_tipo_parametro Int?
+
+  estacao        Estacao       @relation(fields: [id_estacao], references: [id_estacao])
+  usuario        Usuario       @relation(fields: [id_usuario], references: [id_usuario])
+  tipo_alerta    TipoAlerta?   @relation(fields: [id_tipo_alerta], references: [id])
+  medida         Medida?       @relation(fields: [id_medida], references: [id_medida])
+  tipo_parametro TipoParametro? @relation(fields: [id_tipo_parametro], references: [id_tipo_parametro])
+
+  @@map("alerta")
 }
