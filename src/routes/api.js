@@ -51,6 +51,23 @@ import {
   deleteTipoParametro
 } from "../controllers/type_ParameterController.js";
 
+import {
+  createAlarme,
+  getAlarmeById,
+  getAllAlarmes,
+  deleteAlarme
+} from "../controllers/alarmController.js"
+
+import {
+  createTipoAlerta,
+  getAllTipoAlertas,
+  getTipoAlertaById,
+  updateTipoAlerta,
+  deleteTipoAlerta,
+} from "../controllers/alertTypeController.js";
+
+import { login } from '../controllers/authController.js';
+
 
 // Health Check
 
@@ -720,13 +737,18 @@ router.put('/alerts/:id',updateAlerta)
 */
 router.delete('/alerts/:id',deleteAlerta)
 
-// export default router
+router.post('/alarms', createAlarme)
+router.get('/alarms', getAllAlarmes)
+router.get('/alarms/:id_usuario/:id_medida/:id_alerta', getAlarmeById)
+router.delete('/alarms/:id_usuario/:id_medida/:id_alerta', deleteAlarme)
 
-// router.post('/alerts',createAlerta)
-// router.get('/alerts',getAllAlertas)
-// router.get('/alerts/:id',getAlertaById)
-// router.put('/alerts/:id',updateAlerta)
-// router.delete('/alerts/:id',deleteAlerta)
+router.post("/alert-type", createTipoAlerta)
+router.get("/alert-type", getAllTipoAlertas)
+router.get("/alert-type/:id", getTipoAlertaById)
+router.put("/alert-type/:id", updateTipoAlerta)
+router.delete("/alert-type/:id", deleteTipoAlerta)
+
+router.post("/login", login)
 
 export default router
 
