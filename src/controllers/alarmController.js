@@ -1,5 +1,6 @@
 import { PrismaClient } from "../generated/prisma/index.js";
 import { createAlarmeDTO } from "../dto/alarmeDTO.js";
+import { startOfDay, endOfDay } from 'date-fns'
 
 const prisma = new PrismaClient();
 
@@ -79,6 +80,29 @@ export const getAlarmeById = async (req, res) => {
     res.status(500).json({ message: "Erro ao buscar o alarme", error: error.message });
   }
 };
+
+export const getTodaysAlarme = async (req, res) => {
+  try {
+    const alarms = await prisma.alarme.findMany({
+      orderBy: { created_at: "desc" },
+      where: {
+        created_at: {
+          gte: startOfDay(new Date()),
+          lte: endOfDay(new Date())
+        }
+      },
+      include: {
+        usuario: { select: { id_usuario: true, nome: true, email: true } },
+        medida: true,
+        alerta: true,
+      }
+    })
+    res.status(200).json(alarms)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: "Erro ao buscar os alarmes de hoje", error: error.message })
+  }
+}
 
 // DELETE /alarmes/:id_usuario/:id_medida/:id_alerta
 export const deleteAlarme = async (req, res) => {

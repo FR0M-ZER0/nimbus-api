@@ -56,7 +56,8 @@ import {
   createAlarme,
   getAlarmeById,
   getAllAlarmes,
-  deleteAlarme
+  deleteAlarme,
+  getTodaysAlarme
 } from "../controllers/alarmController.js"
 
 import {
@@ -743,6 +744,7 @@ router.delete('/alerts/:id',deleteAlerta)
 
 router.post('/alarms', createAlarme)
 router.get('/alarms', getAllAlarmes)
+router.get('/alarms/today', getTodaysAlarme)
 router.get('/alarms/:id_usuario/:id_medida/:id_alerta', getAlarmeById)
 router.delete('/alarms/:id_usuario/:id_medida/:id_alerta', deleteAlarme)
 
