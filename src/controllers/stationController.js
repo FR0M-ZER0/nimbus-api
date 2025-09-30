@@ -101,6 +101,39 @@ export const getStationById = async (req, res) => {
     }
 };
 
+// Get /stations/:id/tipo-parametros - Obtém todos os tipos de parâmetros de uma estação
+export const getStationTipoParametros = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const station = await prisma.estacao.findUnique({
+      where: { id_estacao: id },
+      include: {
+        parametros: {
+          include: {
+            tipo_parametro: true,
+          },
+        },
+      },
+    });
+
+    if (!station) {
+      return res.status(404).json({ message: "Estação não encontrada" });
+    }
+
+    const tipoParametros = station.parametros.map(p => p.tipo_parametro);
+    const uniqueTipoParametros = Array.from(
+      new Map(tipoParametros.map(tp => [tp.id_tipo_parametro, tp])).values()
+    );
+
+    res.status(200).json(uniqueTipoParametros);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao buscar os tipos de parâmetros da estação", error: error.message });
+  }
+};
+
+
 // Put /stations/:id - Atualiza uma estação pelo id
 export const updateStation = async (req, res) => {
     try {

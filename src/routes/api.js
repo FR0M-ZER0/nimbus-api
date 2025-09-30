@@ -32,7 +32,8 @@ import {
     getAllStations,
     getStationById,
     updateStation,
-    deleteStation
+    deleteStation,
+    getStationTipoParametros
 } from '../controllers/stationController.js'
 
 import {
@@ -236,6 +237,9 @@ router.put('/stations/:id', updateStation)
 *         description: Erro ao deletar a estação
 */
 router.delete('/stations/:id', deleteStation)
+
+router.get("/stations/:id/tipo-parametros", getStationTipoParametros)
+
 /**
 // Parameters
 
