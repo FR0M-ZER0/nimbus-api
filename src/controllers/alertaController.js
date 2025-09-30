@@ -46,7 +46,11 @@ export const getAllAlertas = async (req, res) => {
     const alertas = await prisma.alerta.findMany({
       include: {
         tipo_alerta: true,
-        parametro: true,
+        parametro: {
+          include: {
+            estacao: true,
+          },
+        },
         alertaUsuarios: {
           include: {
             usuario: { select: { id_usuario: true, nome: true, email: true } },
@@ -71,7 +75,11 @@ export const getAlertaById = async (req, res) => {
       where: { id_alerta: parseInt(id) },
       include: {
         tipo_alerta: true,
-        parametro: true,
+        parametro: {
+          include: {
+            estacao: true,
+          },
+        },
         alertaUsuarios: {
           include: {
             usuario: { select: { id_usuario: true, nome: true, email: true } },
