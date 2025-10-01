@@ -32,7 +32,8 @@ import {
     getAllStations,
     getStationById,
     updateStation,
-    deleteStation
+    deleteStation,
+    getStationTipoParametros
 } from '../controllers/stationController.js'
 
 import {
@@ -55,7 +56,8 @@ import {
   createAlarme,
   getAlarmeById,
   getAllAlarmes,
-  deleteAlarme
+  deleteAlarme,
+  getTodaysAlarme
 } from "../controllers/alarmController.js"
 
 import {
@@ -236,6 +238,9 @@ router.put('/stations/:id', updateStation)
 *         description: Erro ao deletar a estação
 */
 router.delete('/stations/:id', deleteStation)
+
+router.get("/stations/:id/tipo-parametros", getStationTipoParametros)
+
 /**
 // Parameters
 
@@ -739,6 +744,7 @@ router.delete('/alerts/:id',deleteAlerta)
 
 router.post('/alarms', createAlarme)
 router.get('/alarms', getAllAlarmes)
+router.get('/alarms/today', getTodaysAlarme)
 router.get('/alarms/:id_usuario/:id_medida/:id_alerta', getAlarmeById)
 router.delete('/alarms/:id_usuario/:id_medida/:id_alerta', deleteAlarme)
 

@@ -69,10 +69,10 @@ async function main() {
   // 4. Estação
   console.log('\n--- Criando Estação ---');
   const estacao = await prisma.estacao.upsert({
-    where: { id_estacao: "EST001" },
+    where: { id_estacao: 'EST001' },
     update: {},
     create: {
-      id_estacao: "EST001",
+      id_estacao: 'EST001',
       nome: 'Estufa Principal',
       endereco: 'Rua das Flores, 123',
       latitude: -23.1791,
@@ -123,13 +123,31 @@ async function main() {
   const alerta = await prisma.alerta.create({
     data: {
       id_tipo_alerta: tipoAlerta.id,
-      id_usuario: adminUser.id_usuario,
-      id_estacao: estacao.id_estacao,
+      id_parametro: parametro.id_parametro,
       titulo: 'Alerta de Teste',
       texto: 'Temperatura acima do limite configurado.',
     },
   });
   console.log(`Alerta criado com a mensagem: "${alerta.texto}".`);
+
+  // 9. Relacionar alerta com usuário (AlertaUsuario)
+  await prisma.alertaUsuario.create({
+    data: {
+      id_usuario: adminUser.id_usuario,
+      id_alerta: alerta.id_alerta,
+    },
+  });
+  console.log(`Alerta vinculado ao usuário ${adminUser.nome}.`);
+
+  // 10. Criar Alarme (associando medida + alerta + usuário)
+  await prisma.alarme.create({
+    data: {
+      id_usuario: adminUser.id_usuario,
+      id_medida: medida.id_medida,
+      id_alerta: alerta.id_alerta,
+    },
+  });
+  console.log(`Alarme registrado para o usuário ${adminUser.nome}.`);
 
   console.log('\nSeed finalizado com sucesso.');
 }
