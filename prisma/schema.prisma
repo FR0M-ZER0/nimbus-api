@@ -71,6 +71,7 @@ model Estacao {
   usuario    Usuario     @relation(fields: [id_usuario], references: [id_usuario])
   parametros Parametro[]
   estacaoStatus EstacaoStatus[]
+  estacaoLog EstacaoLog[]
 
   @@map("estacao")
 }
@@ -174,4 +175,13 @@ model EstacaoStatus {
   id_estacao String
   estacao Estacao @relation(fields: [id_estacao], references: [id_estacao])
   @@map("estacao_log")
+}
+
+model EstacaoLog {
+  id_log Int @id @default(autoincrement())
+  data_sent Int // it's in kb
+  created_at DateTime @default(now())
+
+  id_estacao String
+  estacao Estacao @relation(fields: [id_estacao], references: [id_estacao])
 }
