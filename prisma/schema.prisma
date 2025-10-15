@@ -174,7 +174,7 @@ model EstacaoStatus {
 
   id_estacao String
   estacao Estacao @relation(fields: [id_estacao], references: [id_estacao])
-  @@map("estacao_log")
+  @@map("estacao_status")
 }
 
 model EstacaoLog {
@@ -184,9 +184,11 @@ model EstacaoLog {
 
   id_estacao String
   estacao Estacao @relation(fields: [id_estacao], references: [id_estacao])
+  @@map("estacao_log")
 }
 
 model DataProcessingLog {
   id_log Int @id @default(autoincrement())
   created_at DateTime @default(now())
+  @@map("data_processing_log")
 }
