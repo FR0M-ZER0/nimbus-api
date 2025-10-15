@@ -70,7 +70,7 @@ model Estacao {
 
   usuario    Usuario     @relation(fields: [id_usuario], references: [id_usuario])
   parametros Parametro[]
-  estacaoLog EstacaoLog[]
+  estacaoStatus EstacaoStatus[]
 
   @@map("estacao")
 }
@@ -166,10 +166,9 @@ model Alarme {
   @@map("alarme")
 }
 
-model EstacaoLog {
-  id_log Int @id @default(autoincrement())
+model EstacaoStatus {
+  id_status Int @id @default(autoincrement())
   status Status
-  data_sent Float?
   created_at DateTime @default(now())
 
   id_estacao String
