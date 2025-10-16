@@ -70,6 +70,14 @@ import {
 
 import { login } from '../controllers/authController.js';
 
+import {
+  createEstacaoStatus,
+  getAllEstacaoStatus,
+  getEstacaoStatusById,
+  deleteEstacaoStatus,
+  getStatusByEstacao,
+  getLastStatusByEstacao
+} from '../controllers/estacaoStatusController.js';
 
 // Health Check
 
@@ -755,6 +763,13 @@ router.put("/alert-type/:id", updateTipoAlerta)
 router.delete("/alert-type/:id", deleteTipoAlerta)
 
 router.post("/login", login)
+
+router.post('/station-status', createEstacaoStatus)
+router.get('/station-status', getAllEstacaoStatus)
+router.get('/station-status/station/last/:id_estacao', getLastStatusByEstacao)
+router.get('/station-status/station/:id_estacao', getStatusByEstacao)
+router.get('/station-status/:id', getEstacaoStatusById)
+router.delete('/station-status/:id', deleteEstacaoStatus)
 
 export default router
 
