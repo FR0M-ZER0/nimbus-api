@@ -1,4 +1,5 @@
 import { PrismaClient } from "../generated/prisma/index.js"
+import { broadcast } from "../websocket/wsServer.js"
 
 const prisma = new PrismaClient()
 
@@ -34,6 +35,15 @@ async function insertLogs() {
         const processing = await prisma.dataProcessingLog.create({
             data: {}
         })
+
+        const payload = {
+            timestamp: new Date(),
+            estacaoStatus: status,
+            estacaoLog: log,
+            dataProcessingLog: processing,
+        }
+
+        broadcast(payload)
 
         console.log("✅ Registros inseridos com sucesso!")
         console.log({

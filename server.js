@@ -1,5 +1,11 @@
 import app from './src/index.js'
+import http from 'http'
+import { initWebSocket } from './src/websocket/wsServer.js'
+
 const PORT = 3001
+
+const server = http.createServer(app)
+initWebSocket(server)
 
 app.listen(PORT, () => {
     console.log(`Server started on address ${process.env.SERVER_ADDRESS}`)
