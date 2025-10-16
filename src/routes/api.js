@@ -79,6 +79,14 @@ import {
   getLastStatusByEstacao
 } from '../controllers/estacaoStatusController.js';
 
+import {
+  createEstacaoLog,
+  getAllEstacaoLogs,
+  getEstacaoLogById,
+  deleteEstacaoLog,
+  getLogsByEstacao
+} from '../controllers/stationLogController.js'
+
 // Health Check
 
 /**
@@ -770,6 +778,12 @@ router.get('/station-status/station/last/:id_estacao', getLastStatusByEstacao)
 router.get('/station-status/station/:id_estacao', getStatusByEstacao)
 router.get('/station-status/:id', getEstacaoStatusById)
 router.delete('/station-status/:id', deleteEstacaoStatus)
+
+router.post('/station-log', createEstacaoLog)
+router.get('/station-log', getAllEstacaoLogs)
+router.get('/station-log/station/:id_estacao', getLogsByEstacao)
+router.get('/station-log/:id', getEstacaoLogById)
+router.delete('/station-log/:id', deleteEstacaoLog)
 
 export default router
 
