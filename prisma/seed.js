@@ -74,7 +74,7 @@ async function main() {
     create: {
       id_estacao: 'EST001',
       nome: 'Estufa Principal',
-      endereco: 'Rua das Flores, 123',
+      endereco: 'Rua das Flores - Amazonas/AM',
       latitude: -23.1791,
       longitude: -45.8872,
       descricao: 'Estação de monitoramento da estufa principal.',
