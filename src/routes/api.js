@@ -87,6 +87,13 @@ import {
   getLogsByEstacao
 } from '../controllers/stationLogController.js'
 
+import {
+  createDataProcessingLog,
+  getAllDataProcessingLogs,
+  getDataProcessingLogById,
+  deleteDataProcessingLog
+} from '../controllers/dataProcessingLogController.js'
+
 // Health Check
 
 /**
@@ -784,6 +791,11 @@ router.get('/station-log', getAllEstacaoLogs)
 router.get('/station-log/station/:id_estacao', getLogsByEstacao)
 router.get('/station-log/:id', getEstacaoLogById)
 router.delete('/station-log/:id', deleteEstacaoLog)
+
+router.post('/data-processing-log', createDataProcessingLog)
+router.get('/data-processing-log', getAllDataProcessingLogs)
+router.get('/data-processing-log/:id', getDataProcessingLogById)
+router.delete('/data-processing-log/:id', deleteDataProcessingLog)
 
 export default router
 
