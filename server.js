@@ -7,6 +7,6 @@ const PORT = 3001
 const server = http.createServer(app)
 initWebSocket(server)
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server started on address ${process.env.SERVER_ADDRESS}`)
 })

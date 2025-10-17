@@ -1,68 +1,68 @@
-import { PrismaClient } from "../generated/prisma/index.js"
-import { broadcast } from "../websocket/wsServer.js"
+import WebSocket from 'ws'
 
-const prisma = new PrismaClient()
+const WS_URL = 'ws://localhost:3001'
+const ESTACAO_ID = 'EST001'
+let lastStatus = 'OFFLINE'
 
-const ESTACAO_ID = "EST001"
-let lastStatus = "OFFLINE"
+const ws = new WebSocket(WS_URL)
+
+ws.on('open', () => {
+    console.log('✅ Simulador conectado ao servidor WebSocket')
+    sendData()
+    setInterval(sendData, 15000)
+})
+
+ws.on('message', (msg) => {
+    console.log('📩 Mensagem do servidor:', msg.toString())
+})
+
+ws.on('close', () => {
+    console.log('🔴 Conexão encerrada com o servidor')
+})
 
 function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
-async function insertLogs() {
-    try {
-        lastStatus = lastStatus === "ONLINE" ? "OFFLINE" : "ONLINE"
-        const dataSent = randomInt(50, 500)
-
-        console.log(`\n[${new Date().toLocaleTimeString()}] Inserindo novos registros...`)
-        console.log(`Status: ${lastStatus} | Data Sent: ${dataSent} KB`)
-
-        const status = await prisma.estacaoStatus.create({
-            data: {
-                id_estacao: ESTACAO_ID,
-                status: lastStatus
-            }
-        })
-
-        const log = await prisma.estacaoLog.create({
-            data: {
-                id_estacao: ESTACAO_ID,
-                data_sent: dataSent
-            }
-        })
-
-        const processing = await prisma.dataProcessingLog.create({
-            data: {}
-        })
-
-        const payload = {
-            timestamp: new Date(),
-            estacaoStatus: status,
-            estacaoLog: log,
-            dataProcessingLog: processing,
-        }
-
-        broadcast(payload)
-
-        console.log("✅ Registros inseridos com sucesso!")
-        console.log({
-            estacaoStatusId: status.id_status,
-            estacaoLogId: log.id_log,
-            dataProcessingLogId: processing.id_log
-        })
-    } catch (error) {
-        console.error("❌ Erro ao inserir registros:", error.message)
+function sendData() {
+    if (ws.readyState !== WebSocket.OPEN) {
+        console.warn('⚠️ WebSocket não está pronto. Ignorando envio...')
+        return
     }
+
+    lastStatus = lastStatus === 'ONLINE' ? 'OFFLINE' : 'ONLINE'
+    const dataSent = randomInt(50, 500)
+
+    const statusMessage = {
+        type: 'STATUS_UPDATE',
+        estacaoStatus: {
+            id_estacao: ESTACAO_ID,
+            status: lastStatus,
+            created_at: new Date().toISOString()
+        }
+    }
+
+    const logMessage = {
+        type: 'LOG_UPDATE',
+        estacaoLog: {
+            id_estacao: ESTACAO_ID,
+            data_sent: dataSent,
+            created_at: new Date().toISOString()
+        }
+    }
+
+    const processingMessage = {
+        type: 'PROCESSING_LOG',
+        dataProcessingLog: {
+            id_estacao: ESTACAO_ID,
+            created_at: new Date().toISOString()
+        }
+    }
+
+    console.log(`\n[${new Date().toLocaleTimeString()}] Enviando dados da estação...`)
+    console.log(statusMessage, logMessage, processingMessage)
+
+    ws.send(JSON.stringify(statusMessage))
+    ws.send(JSON.stringify(logMessage))
+    ws.send(JSON.stringify(processingMessage))
 }
-
-console.log("🚀 Iniciando script de inserção automática (1 min)...")
-insertLogs()
-
-setInterval(insertLogs, 60_000)
-
-process.on("SIGINT", async () => {
-    console.log("\nEncerrando script...")
-    await prisma.$disconnect()
-    process.exit(0)
-})
