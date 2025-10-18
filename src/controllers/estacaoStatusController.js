@@ -1,5 +1,7 @@
 import { PrismaClient } from "../generated/prisma/index.js";
 import { createEstacaoStatusDTO } from "../dto/estacaoStatusDTO.js";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 const prisma = new PrismaClient();
 
@@ -258,6 +260,45 @@ export const getLastStatusByEstacao = async (req, res) => {
     console.error(error);
     res.status(500).json({
       message: "Erro ao buscar o status mais recente da estação.",
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * GET /estacao-status/resumo
+ * Retorna a quantidade de estações ONLINE e OFFLINE (baseado no último status de cada uma)
+ */
+export const getEstacoesStatusByOnOff = async (req, res) => {
+  try {
+    const lastStatus = await prisma.$queryRaw`
+      SELECT DISTINCT ON (es.id_estacao)
+        es.id_estacao,
+        es.status
+      FROM estacao_status es
+      ORDER BY es.id_estacao, es.created_at DESC
+    `;
+
+    let online = 0;
+    let offline = 0;
+
+    for (const s of lastStatus) {
+      if (s.status === "ONLINE") online++;
+      else if (s.status === "OFFLINE") offline++;
+    }
+
+    const currentDate = format(new Date(), "dd/MM/yyyy 'às' HH:mm:ss", { locale: ptBR });
+
+    return res.status(200).json({
+      current_date: currentDate,
+      online,
+      offline,
+      total: online + offline,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Erro ao calcular resumo de status das estações",
       error: error.message,
     });
   }

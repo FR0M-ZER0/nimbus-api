@@ -1,6 +1,7 @@
 import { PrismaClient } from "../generated/prisma/index.js";
 import { createEstacaoLogDTO } from "../dto/estacaoLogDTO.js";
-import { startOfDay, endOfDay } from "date-fns";
+import { startOfDay, endOfDay, format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 const prisma = new PrismaClient();
 
@@ -219,3 +220,45 @@ export const getLogsByEstacao = async (req, res) => {
   }
 };
 
+/**
+ * GET /estacao-log/hoje
+ * Retorna o total de dados enviados (data_sent) no dia atual em MB
+ */
+export const getTotalDataSentToday = async (req, res) => {
+  try {
+    const today = new Date();
+
+    const startOfToday = startOfDay(today);
+    const endOfToday = endOfDay(today);
+
+    const result = await prisma.estacaoLog.aggregate({
+      _sum: {
+        data_sent: true,
+      },
+      where: {
+        created_at: {
+          gte: startOfToday,
+          lte: endOfToday,
+        },
+      },
+    });
+
+    const totalDataSentKB = result._sum.data_sent || 0;
+    const totalDataSentMB = totalDataSentKB / 1024;
+
+    const currentDate = format(today, "dd/MM/yyyy 'às' HH:mm:ss", { locale: ptBR });
+
+    res.status(200).json({
+      data: {
+        current_date: currentDate,
+        total_data_sent_mb: parseFloat(totalDataSentMB.toFixed(2)),
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Erro ao calcular o total de dados enviados hoje",
+      error: error.message,
+    });
+  }
+};

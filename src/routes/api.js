@@ -76,7 +76,8 @@ import {
   getEstacaoStatusById,
   deleteEstacaoStatus,
   getStatusByEstacao,
-  getLastStatusByEstacao
+  getLastStatusByEstacao,
+  getEstacoesStatusByOnOff
 } from '../controllers/estacaoStatusController.js';
 
 import {
@@ -84,7 +85,8 @@ import {
   getAllEstacaoLogs,
   getEstacaoLogById,
   deleteEstacaoLog,
-  getLogsByEstacao
+  getLogsByEstacao,
+  getTotalDataSentToday
 } from '../controllers/stationLogController.js'
 
 import {
@@ -781,6 +783,7 @@ router.post("/login", login)
 
 router.post('/station-status', createEstacaoStatus)
 router.get('/station-status', getAllEstacaoStatus)
+router.get('/station-status/summary', getEstacoesStatusByOnOff)
 router.get('/station-status/station/last/:id_estacao', getLastStatusByEstacao)
 router.get('/station-status/station/:id_estacao', getStatusByEstacao)
 router.get('/station-status/:id', getEstacaoStatusById)
@@ -788,6 +791,7 @@ router.delete('/station-status/:id', deleteEstacaoStatus)
 
 router.post('/station-log', createEstacaoLog)
 router.get('/station-log', getAllEstacaoLogs)
+router.get('/station-log/data-sent', getTotalDataSentToday)
 router.get('/station-log/station/:id_estacao', getLogsByEstacao)
 router.get('/station-log/:id', getEstacaoLogById)
 router.delete('/station-log/:id', deleteEstacaoLog)
