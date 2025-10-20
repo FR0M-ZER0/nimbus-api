@@ -303,3 +303,52 @@ export const getEstacoesStatusByOnOff = async (req, res) => {
     });
   }
 };
+
+// GET /activity/history
+// Retorna as últimas 30 atividades (status + logs + processamentos)
+export const getActivityHistory = async (req, res) => {
+  try {
+    const [status, logs, processamentos] = await Promise.all([
+      prisma.estacaoStatus.findMany({
+        orderBy: { created_at: "desc" },
+        take: 30,
+        include: { estacao: { select: { id_estacao: true } } },
+      }),
+      prisma.estacaoLog.findMany({
+        orderBy: { created_at: "desc" },
+        take: 30,
+        include: { estacao: { select: { id_estacao: true } } },
+      }),
+      prisma.dataProcessingLog.findMany({
+        orderBy: { created_at: "desc" },
+        take: 30,
+      }),
+    ]);
+
+    const history = [
+      ...status.map(s => ({
+        date: s.created_at,
+        station: s.id_estacao,
+        event: s.status === "ONLINE" ? "Retomou conexão" : "Conexão perdida"
+      })),
+      ...logs.map(l => ({
+        date: l.created_at,
+        station: l.id_estacao,
+        event: "Enviou dados não processados"
+      })),
+      ...processamentos.map(p => ({
+        date: p.created_at,
+        station: "Sistema",
+        event: "Dados processados"
+      })),
+    ]
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 30);
+
+    return res.status(200).json({ history });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Erro ao buscar histórico", error: error.message });
+  }
+};
+

@@ -77,7 +77,8 @@ import {
   deleteEstacaoStatus,
   getStatusByEstacao,
   getLastStatusByEstacao,
-  getEstacoesStatusByOnOff
+  getEstacoesStatusByOnOff,
+  getActivityHistory
 } from '../controllers/estacaoStatusController.js';
 
 import {
@@ -800,6 +801,8 @@ router.post('/data-processing-log', createDataProcessingLog)
 router.get('/data-processing-log', getAllDataProcessingLogs)
 router.get('/data-processing-log/:id', getDataProcessingLogById)
 router.delete('/data-processing-log/:id', deleteDataProcessingLog)
+
+router.get('/logs/activity', getActivityHistory)
 
 export default router
 
