@@ -361,6 +361,10 @@ export const getActivityHistoryAll = async (req, res) => {
     const skip = (page - 1) * limit
     const need = page * limit
 
+    const search = req.query.search?.trim().toLowerCase() || ""
+    const orderBy = req.query.orderBy || "newest"
+    const statusFilter = req.query.status?.toLowerCase() || ""
+
     const [countStatus, countLogs, countProcess] = await Promise.all([
       prisma.estacaoStatus.count(),
       prisma.estacaoLog.count(),
@@ -406,8 +410,33 @@ export const getActivityHistoryAll = async (req, res) => {
       })),
     ]
 
-    const sorted = merged.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-    const pageItems = sorted.slice(skip, skip + limit)
+    let filtered = merged
+    if (search) {
+      filtered = filtered.filter(item =>
+        String(item.station).toLowerCase().includes(search)
+      )
+    }
+
+    if (statusFilter === "info" || statusFilter === "erro") {
+      filtered = filtered.filter(item => item.status.toLowerCase() === statusFilter)
+    }
+
+    switch (orderBy) {
+      case "oldest":
+        filtered.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+        break
+      case "a-z":
+        filtered.sort((a, b) => String(a.station).localeCompare(String(b.station)))
+        break
+      case "z-a":
+        filtered.sort((a, b) => String(b.station).localeCompare(String(a.station)))
+        break
+      default:
+        filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        break
+    }
+
+    const pageItems = filtered.slice(skip, skip + limit)
 
     const history = pageItems.map(item => ({
       ...item,
@@ -424,8 +453,8 @@ export const getActivityHistoryAll = async (req, res) => {
     return res.status(200).json({
       page,
       limit,
-      total: totalCount,
-      totalPages: Math.ceil(totalCount / limit),
+      total: filtered.length,
+      totalPages: Math.ceil(filtered.length / limit),
       history
     })
   } catch (error) {
