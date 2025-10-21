@@ -352,3 +352,73 @@ export const getActivityHistory = async (req, res) => {
   }
 };
 
+// GET /activity/history/paginated?page=1&limit=30
+// Retorna atividades com paginação e campo de status (Info / Erro)
+export const getActivityHistoryAll = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 30
+    const skip = (page - 1) * limit
+
+    const [statusList, logs, processamentos, totalCount] = await Promise.all([
+      prisma.estacaoStatus.findMany({
+        orderBy: { created_at: "desc" },
+        skip,
+        take: limit,
+        include: { estacao: { select: { id_estacao: true } } },
+      }),
+      prisma.estacaoLog.findMany({
+        orderBy: { created_at: "desc" },
+        skip,
+        take: limit,
+        include: { estacao: { select: { id_estacao: true } } },
+      }),
+      prisma.dataProcessingLog.findMany({
+        orderBy: { created_at: "desc" },
+        skip,
+        take: limit,
+      }),
+      Promise.all([
+        prisma.estacaoStatus.count(),
+        prisma.estacaoLog.count(),
+        prisma.dataProcessingLog.count(),
+      ]).then(([c1, c2, c3]) => c1 + c2 + c3)
+    ])
+
+    const history = [
+      ...statusList.map(s => ({
+        date: s.created_at,
+        station: s.id_estacao,
+        event: s.status === "ONLINE" ? "Retomou conexão" : "Conexão perdida",
+        status: s.status === "ONLINE" ? "Info" : "Erro"
+      })),
+      ...logs.map(l => ({
+        date: l.created_at,
+        station: l.id_estacao,
+        event: "Enviou dados não processados",
+        status: "Info"
+      })),
+      ...processamentos.map(p => ({
+        date: p.created_at,
+        station: "Sistema",
+        event: "Dados processados",
+        status: "Info"
+      })),
+    ]
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+
+    return res.status(200).json({
+      page,
+      limit,
+      total: totalCount,
+      totalPages: Math.ceil(totalCount / limit),
+      history
+    })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({
+      message: "Erro ao buscar histórico paginado",
+      error: error.message
+    })
+  }
+}
