@@ -359,53 +359,67 @@ export const getActivityHistoryAll = async (req, res) => {
     const page = parseInt(req.query.page) || 1
     const limit = parseInt(req.query.limit) || 30
     const skip = (page - 1) * limit
+    const need = page * limit
 
-    const [statusList, logs, processamentos, totalCount] = await Promise.all([
+    const [countStatus, countLogs, countProcess] = await Promise.all([
+      prisma.estacaoStatus.count(),
+      prisma.estacaoLog.count(),
+      prisma.dataProcessingLog.count()
+    ])
+    const totalCount = countStatus + countLogs + countProcess
+
+    const [statusList, logs, processamentos] = await Promise.all([
       prisma.estacaoStatus.findMany({
         orderBy: { created_at: "desc" },
-        skip,
-        take: limit,
+        take: need,
         include: { estacao: { select: { id_estacao: true } } },
       }),
       prisma.estacaoLog.findMany({
         orderBy: { created_at: "desc" },
-        skip,
-        take: limit,
+        take: need,
         include: { estacao: { select: { id_estacao: true } } },
       }),
       prisma.dataProcessingLog.findMany({
         orderBy: { created_at: "desc" },
-        skip,
-        take: limit,
+        take: need,
       }),
-      Promise.all([
-        prisma.estacaoStatus.count(),
-        prisma.estacaoLog.count(),
-        prisma.dataProcessingLog.count(),
-      ]).then(([c1, c2, c3]) => c1 + c2 + c3)
     ])
 
-    const history = [
+    const merged = [
       ...statusList.map(s => ({
-        date: s.created_at,
-        station: s.id_estacao,
+        created_at: s.created_at,
+        station: s.estacao?.id_estacao ?? s.id_estacao ?? null,
         event: s.status === "ONLINE" ? "Retomou conexão" : "Conexão perdida",
         status: s.status === "ONLINE" ? "Info" : "Erro"
       })),
       ...logs.map(l => ({
-        date: l.created_at,
-        station: l.id_estacao,
+        created_at: l.created_at,
+        station: l.estacao?.id_estacao ?? l.id_estacao ?? null,
         event: "Enviou dados não processados",
         status: "Info"
       })),
       ...processamentos.map(p => ({
-        date: p.created_at,
-        station: "Sistema",
+        created_at: p.created_at,
+        station: "Data Processing Service",
         event: "Dados processados",
         status: "Info"
       })),
     ]
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
+
+    const sorted = merged.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    const pageItems = sorted.slice(skip, skip + limit)
+
+    const history = pageItems.map(item => ({
+      ...item,
+      date: new Date(item.created_at).toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      }) + " às " + new Date(item.created_at).toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit"
+      })
+    }))
 
     return res.status(200).json({
       page,
