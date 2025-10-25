@@ -1,6 +1,7 @@
 // src/controllers/alertaController.js
 import { PrismaClient } from "../generated/prisma/index.js";
 import { createAlertaDTO, updateAlertaDTO } from "../dto/alertaDTO.js";
+import { alertPaginationQueryDTO } from "../dto/alertPaginationDTO.js";
 
 const prisma = new PrismaClient();
 
@@ -43,27 +44,119 @@ export const createAlerta = async (req, res) => {
 // GET /alerts
 export const getAllAlertas = async (req, res) => {
   try {
-    const alertas = await prisma.alerta.findMany({
-      include: {
-        tipo_alerta: true,
-        parametro: {
-          include: {
-            estacao: true,
-          },
-        },
-        alertaUsuarios: {
-          include: {
-            usuario: { select: { id_usuario: true, nome: true, email: true } },
-          },
-        },
-      },
-      orderBy: { data_hora: "desc" },
-    });
+    const { page, limit, sortBy, sortOrder, search, tipoParametroNome, tipoAlertaValor } = 
+      alertPaginationQueryDTO.parse(req.query);
+      
+    const skip = (page - 1) * limit;
 
-    res.status(200).json(alertas);
+    // Build dynamic WHERE condition
+    const where = {};
+    
+    // 1. Search filter for title
+    if (search) {
+      where.titulo = {
+        contains: search,
+        mode: 'insensitive'
+      };
+    }
+    
+    // 2. Filter by TipoParametro's nome
+    if (tipoParametroNome) {
+      where.parametro = {
+        tipo_parametro: {
+          nome: {
+            contains: tipoParametroNome,
+            mode: 'insensitive'
+          }
+        }
+      };
+    }
+    
+    // 3. Filter by Tipo_Alerta's valor
+    if (tipoAlertaValor !== undefined) {
+      where.tipo_alerta = {
+        valor: {
+          equals: tipoAlertaValor
+        }
+      };
+    }
+
+    // Determine orderBy
+    let orderBy;
+    
+    if (sortBy === 'titulo') {
+      orderBy = { titulo: sortOrder };
+    } 
+    else if (sortBy === 'usuario_created_at') {
+      // Sort by the latest user assignment date
+      orderBy = { 
+        alertaUsuarios: { 
+          _max: { 
+            created_at: sortOrder 
+          } 
+        } 
+      };
+    }
+    else {
+      orderBy = { [sortBy]: sortOrder };
+    }
+
+    const [alertas, totalItems] = await prisma.$transaction([
+      prisma.alerta.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy,
+        include: {
+          tipo_alerta: true,
+          parametro: {
+            include: {
+              estacao: true,
+              tipo_parametro: true // Required for filtering
+            },
+          },
+          alertaUsuarios: {
+            include: {
+              usuario: { select: { id_usuario: true, nome: true, email: true } },
+            },
+            orderBy: {
+              created_at: 'desc' // Always get most recent user assignments first
+            }
+          },
+        },
+      }),
+      prisma.alerta.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(totalItems / limit);
+
+    res.status(200).json({
+      data: alertas,
+      meta: {
+        totalItems,
+        currentPage: page,
+        totalPages,
+        itemsPerPage: limit,
+      }
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erro ao buscar os alertas", error: error.message });
+    
+    // Handle Zod validation errors
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        message: "Erro de validação nos parâmetros da requisição",
+        errors: error.errors.map(issue => ({
+          field: issue.path.join('.'),
+          message: issue.message
+        }))
+      });
+    }
+    
+    res.status(500).json({ 
+      message: "Erro ao buscar os alertas", 
+      error: error.message 
+    });
   }
 };
 
