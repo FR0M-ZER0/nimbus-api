@@ -156,16 +156,75 @@ router.get('/health', healthCheck)
 *         description: Erro ao criar a estação
 */
 router.post('/stations', createStation)
-/**
 
 /**
 * @swagger
 * /stations:
 *   get:
-*     summary: Lista todas as estações
+*     summary: Lista todas as estações com opções de filtragem
+*     parameters:
+*       - in: query
+*         name: page
+*         schema:
+*           type: integer
+*           default: 1
+*         description: Página atual da paginação
+*       - in: query
+*         name: limit
+*         schema:
+*           type: integer
+*           default: 10
+*         description: Itens por página
+*       - in: query
+*         name: sortBy
+*         schema:
+*           type: string
+*           enum: 
+*             - data_criacao
+*             - id_estacao
+*             - nome
+*           default: data_criacao
+*         description: Campo para ordenação
+*       - in: query
+*         name: sortOrder
+*         schema:
+*           type: string
+*           enum: 
+*             - asc
+*             - desc
+*           default: desc
+*         description: Direção da ordenação
+*       - in: query
+*         name: search
+*         schema:
+*           type: string
+*         description: Termo de busca para o nome da estação
+*       - in: query
+*         name: status
+*         schema:
+*           type: string
+*           enum: 
+*             - all
+*             - on
+*             - off
+*           default: all
+*         description: Filtrar por status da estação (online/offline)
+*       - in: query
+*         name: parameterTypes
+*         schema:
+*           type: string
+*         description: 'IDs dos tipos de parâmetros separados por vírgula (ex: "1,2,3")'
+*       - in: query
+*         name: state
+*         schema:
+*           type: string
+*           pattern: "^[A-Z]{2}$"
+*         description: 'Código de estado brasileiro (ex: SP, RJ, AM)'
 *     responses:
 *       200:
-*         description: Lista de estações
+*         description: Lista de estações com filtros aplicados
+*       400:
+*         description: Erro de validação nos parâmetros
 *       500:
 *         description: Erro ao buscar as estações
 */
@@ -675,15 +734,77 @@ router.post('/alerts',createAlerta)
   * @swagger
 * /alerts:
 *   get:
-*     summary: Lista todos os alertas
-*     tags: [Alertas]
+*     summary: Lista todos os alertas com opções de filtragem e ordenação
+*     parameters:
+*       - in: query
+*         name: page
+*         schema:
+*           type: integer
+*           default: 1
+*         description: Página atual da paginação
+*       - in: query
+*         name: limit
+*         schema:
+*           type: integer
+*           default: 10
+*         description: Itens por página
+*       - in: query
+*         name: sortBy
+*         schema:
+*           type: string
+*           enum: [data_hora, titulo, usuario_created_at]
+*           default: data_hora
+*         description: Campo para ordenação
+*       - in: query
+*         name: sortOrder
+*         schema:
+*           type: string
+*           enum: [asc, desc]
+*           default: desc
+*         description: Direção da ordenação
+*       - in: query
+*         name: search
+*         schema:
+*           type: string
+*         description: Termo de busca para o título do alerta
+*       - in: query
+*         name: tipoParametroNome
+*         schema:
+*           type: string
+*         description: 'Filtrar por nome do tipo de parâmetro (ex: "Temperatura")'
+*       - in: query
+*         name: tipoAlertaValor
+*         schema:
+*           type: number
+*         description: 'Filtrar por valor do tipo de alerta (ex: 30.5)'
 *     responses:
 *       200:
-*         description: Lista de Alerta
+*         description: Lista de alertas com filtros e ordenação aplicados
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 data:
+*                   type: array
+*                   items:
+*                     $ref: '#/components/schemas/Alerta'
+*                 meta:
+*                   type: object
+*                   properties:
+*                     totalItems:
+*                       type: integer
+*                     currentPage:
+*                       type: integer
+*                     totalPages:
+*                       type: integer
+*                     itemsPerPage:
+*                       type: integer
+*       400:
+*         description: Erro de validação nos parâmetros
 *       500:
 *         description: Erro ao buscar os alertas
 */
-
 router.get('/alerts',getAllAlertas)
 
 /**
@@ -770,6 +891,86 @@ router.put('/alerts/:id',updateAlerta)
 router.delete('/alerts/:id',deleteAlerta)
 
 router.post('/alarms', createAlarme)
+/**
+  * @swagger
+* /alarms:
+*   get:
+*     summary: Lista todos os alarmes com opções de filtragem e ordenação
+*     parameters:
+*       - in: query
+*         name: page
+*         schema:
+*           type: integer
+*           default: 1
+*         description: Página atual da paginação
+*       - in: query
+*         name: limit
+*         schema:
+*           type: integer
+*           default: 10
+*         description: Itens por página
+*       - in: query
+*         name: sortBy
+*         schema:
+*           type: string
+*           enum: [created_at, valor]
+*           default: created_at
+*         description: Campo para ordenação
+*       - in: query
+*         name: sortOrder
+*         schema:
+*           type: string
+*           enum: [asc, desc]
+*           default: desc
+*         description: Direção da ordenação
+*       - in: query
+*         name: id_alerta
+*         schema:
+*           type: integer
+*         description: Filtrar por ID do alerta
+*       - in: query
+*         name: valorSearch
+*         schema:
+*           type: number
+*         description: Valor exato da medida para busca
+*       - in: query
+*         name: valorMin
+*         schema:
+*           type: number
+*         description: Valor mínimo da medida
+*       - in: query
+*         name: valorMax
+*         schema:
+*           type: number
+*         description: Valor máximo da medida
+*     responses:
+*       200:
+*         description: Lista de alarmes com filtros e ordenação aplicados
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 data:
+*                   type: array
+*                   items:
+*                     $ref: '#/components/schemas/Alarme'
+*                 meta:
+*                   type: object
+*                   properties:
+*                     totalItems:
+*                       type: integer
+*                     currentPage:
+*                       type: integer
+*                     totalPages:
+*                       type: integer
+*                     itemsPerPage:
+*                       type: integer
+*       400:
+*         description: Erro de validação nos parâmetros
+*       500:
+*         description: Erro ao buscar os alarmes
+*/
 router.get('/alarms', getAllAlarmes)
 router.get('/alarms/today', getTodaysAlarme)
 router.get('/alarms/:id_usuario/:id_medida/:id_alerta', getAlarmeById)
