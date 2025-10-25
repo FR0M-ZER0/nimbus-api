@@ -1,6 +1,7 @@
 import { PrismaClient } from "../generated/prisma/index.js";
 import { createAlarmeDTO } from "../dto/alarmeDTO.js";
-import { startOfDay, endOfDay } from 'date-fns'
+import { startOfDay, endOfDay } from 'date-fns';
+import { alarmPaginationQueryDTO } from "../dto/alarmPaginationDTO.js";
 
 const prisma = new PrismaClient();
 
@@ -35,19 +36,104 @@ export const createAlarme = async (req, res) => {
 // GET /alarmes
 export const getAllAlarmes = async (req, res) => {
   try {
-    const alarmes = await prisma.alarme.findMany({
-      include: {
-        usuario: { select: { id_usuario: true, nome: true, email: true } },
-        medida: true,
-        alerta: true,
-      },
-      orderBy: { created_at: "desc" },
-    });
+    const { page, limit, sortBy, sortOrder, id_alerta, valorMin, valorMax, valorSearch } = 
+      alarmPaginationQueryDTO.parse(req.query);
+      
+    const skip = (page - 1) * limit;
 
-    res.status(200).json(alarmes);
+    // Build dynamic WHERE condition
+    const where = {};
+    
+    // 1. Filter by Alarme's id_alerta
+    if (id_alerta !== undefined) {
+      where.id_alerta = id_alerta;
+    }
+    
+    // 2. Filter by Medida's valor (search)
+    if (valorSearch !== undefined) {
+      where.medida = {
+        valor: {
+          equals: valorSearch
+        }
+      };
+    } 
+    // 2b. Filter by Medida's valor (range)
+    else if (valorMin !== undefined || valorMax !== undefined) {
+      where.medida = {
+        valor: {}
+      };
+      
+      if (valorMin !== undefined) {
+        where.medida.valor.gte = valorMin;
+      }
+      
+      if (valorMax !== undefined) {
+        where.medida.valor.lte = valorMax;
+      }
+    }
+
+    // Determine orderBy
+    let orderBy;
+    
+    if (sortBy === 'valor') {
+      // Sort by Medida's valor
+      orderBy = { 
+        medida: { 
+          valor: sortOrder 
+        } 
+      };
+    }
+    else {
+      // Default: sort by created_at
+      orderBy = { created_at: sortOrder };
+    }
+
+    const [alarmes, totalItems] = await prisma.$transaction([
+      prisma.alarme.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy,
+        include: {
+          usuario: { select: { id_usuario: true, nome: true, email: true } },
+          medida: true,
+          alerta: true,
+        },
+      }),
+      prisma.alarme.count({ 
+        where 
+      }),
+    ]);
+
+    const totalPages = Math.ceil(totalItems / limit);
+
+    res.status(200).json({
+      data: alarmes,
+      meta: {
+        totalItems,
+        currentPage: page,
+        totalPages,
+        itemsPerPage: limit,
+      }
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erro ao buscar os alarmes", error: error.message });
+    
+    // Handle Zod validation errors
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        message: "Erro de validação nos parâmetros da requisição",
+        errors: error.errors.map(issue => ({
+          field: issue.path.join('.'),
+          message: issue.message
+        }))
+      });
+    }
+    
+    res.status(500).json({ 
+      message: "Erro ao buscar o alarme", 
+      error: error.message 
+    });
   }
 };
 
