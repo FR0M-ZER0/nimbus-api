@@ -44,35 +44,104 @@ export const createStation = async (req, res) => {
 // Get /stations - Lista todas as estações
 export const getAllStations = async (req, res) => {
   try {
-    const { page, limit, sortBy, sortOrder } = paginationQueryDTO.parse(req.query);
-        
-        const skip = (page - 1) * limit;
+    const { page, limit, sortBy, sortOrder, search, status, parameterTypes, state } = paginationQueryDTO.parse(req.query);
+    const skip = (page - 1) * limit;
 
-        const [stations, totalItems] = await prisma.$transaction([
-            prisma.estacao.findMany({
-                skip: skip,
-                take: limit,
-                orderBy: { data_criacao: 'desc' },
-            }),
+    // Build dynamic WHERE condition
+    let where = {};
 
-            prisma.estacao.count(),
-        ]);
-
-        const totalPages = Math.ceil(totalItems / limit);
-
-        res.status(200).json({
-            data: stations,
-            meta: {
-                totalItems,
-                currentPage: page,
-                totalPages,
-                itemsPerPage: limit,
-            }
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Erro ao buscar as estações", error: error.message });
+    // 1. Search filter (existing)
+    if (search) {
+      where.nome = { 
+        contains: search, 
+        mode: 'insensitive' 
+      };
     }
+
+    // 2. Status filter (ON/OFF)
+    if (status !== 'all') {
+      const statusFilter = status === 'on' ? 'ONLINE' : 'OFFLINE';
+      
+      // Get station IDs with the desired status using a single efficient query
+      where._raw = Prisma.sql`"Estacao"."id_estacao" IN (
+        SELECT id_estacao
+        FROM (
+          SELECT 
+            id_estacao,
+            ROW_NUMBER() OVER (PARTITION BY id_estacao ORDER BY created_at DESC) as rn
+          FROM estacao_status
+          WHERE status = ${statusFilter}
+        ) AS latest
+        WHERE rn = 1
+      )`;
+    }
+
+    if (parameterTypes) {
+      const paramIds = parameterTypes.split(',')
+        .map(id => parseInt(id.trim(), 10))
+        .filter(id => !isNaN(id));
+      
+      if (paramIds.length > 0) {
+        where.parametros = {
+          some: {
+            id_tipo_parametro: { in: paramIds }
+          }
+        };
+      }
+    }
+
+    if (state) {
+      where.endereco = {
+        endsWith: `/${state.toUpperCase()}`
+      };
+    }
+
+    const [stations, totalItems] = await prisma.$transaction([
+      prisma.estacao.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { [sortBy]: sortOrder },
+        include: {
+          parametros: {
+            include: {
+              tipo_parametro: true
+            }
+          }
+        }
+      }),
+      prisma.estacao.count({ where })
+    ]);
+
+    const totalPages = Math.ceil(totalItems / limit);
+
+    res.status(200).json({
+      data: stations,
+      meta: {
+        totalItems,
+        currentPage: page,
+        totalPages,
+        itemsPerPage: limit,
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        message: "Erro de validação nos parâmetros da requisição",
+        errors: error.errors.map(issue => ({
+          field: issue.path.join('.'),
+          message: issue.message
+        }))
+      });
+    }
+    
+    res.status(500).json({ 
+      message: "Erro ao buscar as estações", 
+      error: error.message 
+    });
+  }
 };
 
 // Get /stations/:id - Busca uma estação pelo id
