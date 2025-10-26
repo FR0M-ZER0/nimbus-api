@@ -24,6 +24,8 @@
     "seed": "node prisma/seed.js"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
     "@vitest/coverage-v8": "^3.2.4",
     "supertest": "^7.1.4",
     "vitest": "^3.2.4"
