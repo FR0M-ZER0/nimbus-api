@@ -1,0 +1,58 @@
+name: CI & Standards Validation
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+    branches: ["dev"]
+
+jobs:
+  validate-pr-title:
+    name: "Validate PR Title"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            test
+            build
+            chore
+          subjectPattern: "^[A-Z]+-[0-9]+ - .+"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  validate-branch-name:
+    name: "Validate Branch Name"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lint branch name
+        uses: lekterable/branchlint-action@2.1.0
+        with:
+          allowed: |
+            /feat/[A-Z]+-[0-9]+-[a-z0-9-]+/
+          errorMessage: "O nome da branch não segue o padrão 'feat/TASK-ID-descricao-em-kebab-case'. Ex: feat/NIMB-42-ajustar-ci"
+
+  validate-commits:
+    name: "Validate Commit Messages"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: "npm"
+
+      - name: Instalar Dependências
+        run: npm install
+
+      - name: Validar Mensagens de Commit
+        uses: wagoid/commitlint-github-action@v6
