@@ -1,6 +1,7 @@
 // src/controllers/alertaController.js
 import { PrismaClient } from "../generated/prisma/index.js";
 import { createAlertaDTO, updateAlertaDTO } from "../dto/alertaDTO.js";
+import { sendAlertEmail } from "../services/emailService.js";
 
 const prisma = new PrismaClient();
 
@@ -18,6 +19,8 @@ export const createAlerta = async (req, res) => {
       },
     });
 
+    let usuariosParaNotificar = [];
+
     if (data.usuarios && data.usuarios.length > 0) {
       await prisma.alertaUsuario.createMany({
         data: data.usuarios.map((id_usuario) => ({
@@ -25,8 +28,22 @@ export const createAlerta = async (req, res) => {
           id_alerta: novoAlerta.id_alerta,
         })),
       });
+
+      usuariosParaNotificar = await prisma.usuario.findMany({
+        where: {
+          id_usuario: { in: data.usuarios },
+        },
+        select: { id_usuario: true, nome: true, email: true },
+      });
     }
 
+    if (usuariosParaNotificar.length > 0) {
+      console.log(`Iniciando envio de ${usuariosParaNotificar.length} notificações por email...`);
+      for (const user of usuariosParaNotificar) {
+        await sendAlertEmail(user.email, user.nome, novoAlerta); 
+      }
+      console.log('Envio de notificações por email concluído.');
+    }
     res.status(201).json(novoAlerta);
   } catch (error) {
     if (error.errors) {
