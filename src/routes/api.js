@@ -98,6 +98,14 @@ import {
   deleteDataProcessingLog
 } from '../controllers/dataProcessingLogController.js'
 
+import {
+  createMedida,
+  getAllMedidas,
+  getMedidaById,
+  getMedidasByParametro,
+  deleteMedida,
+} from '../controllers/measureController.js'
+
 // Health Check
 
 /**
@@ -805,6 +813,12 @@ router.delete('/data-processing-log/:id', deleteDataProcessingLog)
 
 router.get('/logs/activity', getActivityHistory)
 router.get('/logs/full-activity', getActivityHistoryAll)
+
+router.post('/measure', createMedida)
+router.get('/measure', getAllMedidas)
+router.get('/measure/params/:id', getMedidasByParametro)
+router.get('/measure/:id', getMedidaById)
+router.delete('/measure/:id', deleteMedida)
 
 export default router
 
