@@ -21,12 +21,25 @@ export const createMedidaDTO = z.object({
     .int(),
 });
 
+const formatUnixToBR = (unixTime) => {
+  const date = new Date(unixTime * 1000);
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+
+  return `${hours}:${minutes}:${seconds}`;
+};
+
 export const medidaResponseDTO = z.object({
   id_medida: z.number().int(),
   id_parametro: z.number().int(),
   valor: z
     .any()
-    .transform(v => (typeof v === "object" && v !== null && "toString" in v ? parseFloat(v.toString()) : Number(v)))
+    .transform(v =>
+      typeof v === "object" && v !== null && "toString" in v
+        ? parseFloat(v.toString())
+        : Number(v)
+    )
     .refine(v => !isNaN(v), { message: "Valor inválido" }),
-  data_hora: z.number(),
+  data_hora: z.number().transform(formatUnixToBR),
 });

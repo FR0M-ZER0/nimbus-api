@@ -1,7 +1,7 @@
 import { PrismaClient } from '../generated/prisma/index.js';
 import { createMedidaDTO, medidaResponseDTO } from '../dto/measureDTO.js';
 import { paginationQueryDTO } from '../dto/paginationDTO.js';
-import { ZodError } from 'zod';
+import { ZodError, z } from 'zod';
 
 const prisma = new PrismaClient();
 
@@ -113,7 +113,12 @@ export const getMedidaById = async (req, res) => {
 export const getMedidasByParametro = async (req, res) => {
   try {
     const { id } = req.params;
-    const { page, limit } = paginationQueryDTO.parse(req.query);
+    const { page, limit, date } = paginationQueryDTO
+      .extend({
+        date: z.string().optional(),
+      })
+      .parse(req.query);
+
     const skip = (page - 1) * limit;
 
     const parametro = await prisma.parametro.findUnique({
@@ -124,15 +129,47 @@ export const getMedidasByParametro = async (req, res) => {
       return res.status(404).json({ message: 'Parâmetro não encontrado.' });
     }
 
+    const getUnixRangeForDate = (dateStr) => {
+      const [day, month, year] = dateStr.split('/').map(Number);
+      const start = new Date(year, month - 1, day, 0, 0, 0);
+      const end = new Date(year, month - 1, day, 23, 59, 59);
+      return {
+        startUnix: Math.floor(start.getTime() / 1000),
+        endUnix: Math.floor(end.getTime() / 1000),
+      };
+    };
+
+    const dateToUse = date || (() => {
+      const now = new Date();
+      const d = String(now.getDate()).padStart(2, '0');
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const y = now.getFullYear();
+      return `${d}/${m}/${y}`;
+    })();
+
+    const { startUnix, endUnix } = getUnixRangeForDate(dateToUse);
+
     const [medidas, totalItems] = await prisma.$transaction([
       prisma.medida.findMany({
-        where: { id_parametro: parseInt(id, 10) },
+        where: {
+          id_parametro: parseInt(id, 10),
+          data_hora: {
+            gte: startUnix,
+            lte: endUnix,
+          },
+        },
         skip,
         take: limit,
         orderBy: { data_hora: 'desc' },
       }),
       prisma.medida.count({
-        where: { id_parametro: parseInt(id, 10) },
+        where: {
+          id_parametro: parseInt(id, 10),
+          data_hora: {
+            gte: startUnix,
+            lte: endUnix,
+          },
+        },
       }),
     ]);
 
@@ -146,11 +183,15 @@ export const getMedidasByParametro = async (req, res) => {
         currentPage: page,
         totalPages,
         itemsPerPage: limit,
+        dateUsed: dateToUse,
       },
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erro ao buscar as medidas do parâmetro', error: error.message });
+    res.status(500).json({
+      message: 'Erro ao buscar as medidas do parâmetro',
+      error: error.message,
+    });
   }
 };
 
