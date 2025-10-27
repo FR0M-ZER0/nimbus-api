@@ -103,7 +103,7 @@ async function main() {
     data: {
       id_parametro: parametro.id_parametro,
       valor: 25.5,
-      data_hora: new Date(),
+      data_hora: 1761571160,
     },
   });
   console.log(`Medida com valor '${medida.valor}' criada para o parâmetro ID ${medida.id_parametro}.`);
