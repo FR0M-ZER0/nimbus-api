@@ -33,7 +33,8 @@ import {
     getStationById,
     updateStation,
     deleteStation,
-    getStationTipoParametros
+    getStationTipoParametros,
+    getStationParams
 } from '../controllers/stationController.js'
 
 import {
@@ -41,7 +42,8 @@ import {
     getAllParameters,
     getParameterById,
     updateParameter,
-    deleteParameter
+    deleteParameter,
+    getParametersByStationId
 } from '../controllers/parameterController.js'
 
 import {
@@ -275,6 +277,7 @@ router.put('/stations/:id', updateStation)
 router.delete('/stations/:id', deleteStation)
 
 router.get("/stations/:id/tipo-parametros", getStationTipoParametros)
+router.get("/stations/:id/params", getStationParams)
 
 /**
 // Parameters
@@ -430,6 +433,8 @@ router.put('/parameters/:id', updateParameter)
  *         description: Erro interno do servidor ao deletar o parâmetro.
  */
 router.delete('/parameters/:id', deleteParameter)
+
+router.get('/parameters/station/:id_estacao', getParametersByStationId)
 
 router.post("/typeParameters", createTipoParametro);
 router.get("/typeParameters", getAllTipoParametro);
