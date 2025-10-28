@@ -81,7 +81,7 @@ jobs:
          npm cache clean --force
          npm install
 
-
+## teste
       - name: Fazer Build da Aplicação (Vite)
         run: npm run build --if-present
 
