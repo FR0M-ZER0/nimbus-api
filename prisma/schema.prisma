@@ -26,6 +26,13 @@ enum Gravidade {
   @@map("gravidade")
 }
 
+enum Status {
+  ONLINE
+  OFFLINE
+
+  @@map("estacaoStatus")
+}
+
 model Usuario {
   id_usuario      Int      @id @default(autoincrement())
   nome            String   @db.VarChar(255)
@@ -63,6 +70,8 @@ model Estacao {
 
   usuario    Usuario     @relation(fields: [id_usuario], references: [id_usuario])
   parametros Parametro[]
+  estacaoStatus EstacaoStatus[]
+  estacaoLog EstacaoLog[]
 
   @@map("estacao")
 }
@@ -156,4 +165,30 @@ model Alarme {
 
   @@id([id_usuario, id_medida, id_alerta])
   @@map("alarme")
+}
+
+model EstacaoStatus {
+  id_status Int @id @default(autoincrement())
+  status Status
+  created_at DateTime @default(now())
+
+  id_estacao String
+  estacao Estacao @relation(fields: [id_estacao], references: [id_estacao])
+  @@map("estacao_status")
+}
+
+model EstacaoLog {
+  id_log Int @id @default(autoincrement())
+  data_sent Int // it's in kb
+  created_at DateTime @default(now())
+
+  id_estacao String
+  estacao Estacao @relation(fields: [id_estacao], references: [id_estacao])
+  @@map("estacao_log")
+}
+
+model DataProcessingLog {
+  id_log Int @id @default(autoincrement())
+  created_at DateTime @default(now())
+  @@map("data_processing_log")
 }

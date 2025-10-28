@@ -74,7 +74,7 @@ async function main() {
     create: {
       id_estacao: 'EST001',
       nome: 'Estufa Principal',
-      endereco: 'Rua das Flores, 123',
+      endereco: 'Rua das Flores - Amazonas/AM',
       latitude: -23.1791,
       longitude: -45.8872,
       descricao: 'Estação de monitoramento da estufa principal.',
@@ -148,6 +148,33 @@ async function main() {
     },
   });
   console.log(`Alarme registrado para o usuário ${adminUser.nome}.`);
+
+  // 11. EstacaoStatus
+  console.log('\n--- Criando EstacaoStatus ---');
+  const estacaoStatus = await prisma.estacaoStatus.create({
+    data: {
+      status: 'ONLINE',
+      id_estacao: estacao.id_estacao,
+    },
+  });
+  console.log(`Status da estação '${estacao.id_estacao}' criado como '${estacaoStatus.status}'.`);
+
+  // 12. EstacaoLog
+  console.log('\n--- Criando EstacaoLog ---');
+  const estacaoLog = await prisma.estacaoLog.create({
+    data: {
+      data_sent: 512,
+      id_estacao: estacao.id_estacao,
+    },
+  });
+  console.log(`Log de estação criado com ${estacaoLog.data_sent} KB enviados.`);
+
+  // 13. DataProcessingLog
+  console.log('\n--- Criando DataProcessingLog ---');
+  const dataProcessingLog = await prisma.dataProcessingLog.create({
+    data: {},
+  });
+  console.log(`Log de processamento de dados criado com ID ${dataProcessingLog.id_log}.`);
 
   console.log('\nSeed finalizado com sucesso.');
 }
