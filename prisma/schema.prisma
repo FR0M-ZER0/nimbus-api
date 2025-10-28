@@ -108,7 +108,7 @@ model Medida {
   id_medida    Int      @id @default(autoincrement())
   id_parametro Int
   valor        Decimal  @db.Decimal(10, 2)
-  data_hora    DateTime @default(now())
+  data_hora    Int
 
   parametro Parametro @relation(fields: [id_parametro], references: [id_parametro])
   alarmes   Alarme[]
