@@ -59,7 +59,11 @@ async function main() {
 
   if (!tipoParametroTemp) {
     tipoParametroTemp = await prisma.tipoParametro.create({
-      data: { nome: 'Temperatura', unidade: '°C' },
+      data: { 
+        nome: 'Temperatura', 
+        unidade: '°C',
+        json: { plu: 1 }
+      },
     });
     console.log(`Tipo de parâmetro '${tipoParametroTemp.nome}' criado com sucesso.`);
   } else {
