@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 let testUser;
 let testTipoAlerta;
 let testAlerta;
-
+// test
 describe('Testes das Rotas de Alertas', () => {
     // Antes de cada teste, limpa o banco e cria os dados necessários (usuário, tipo de alerta, etc.)
     beforeEach(async () => {
