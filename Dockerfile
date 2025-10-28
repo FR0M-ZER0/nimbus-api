@@ -1,8 +1,7 @@
-FROM nginx AS builder
 
+FROM node:20-alpine AS builder
 
 WORKDIR /app
-
 
 COPY package.json package-lock.json ./
 
@@ -11,6 +10,10 @@ RUN npm ci
 
 
 COPY . .
+
+
+RUN npx prisma generate
+
 
 RUN npm run build --if-present
 
@@ -25,7 +28,9 @@ COPY package.json package-lock.json ./
 
 RUN npm ci --omit=dev
 
-COPY --from=builder /app/dist ./dist
+
+COPY --from=builder /app .
+
 
 EXPOSE 8080
 
