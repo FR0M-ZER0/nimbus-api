@@ -5,10 +5,14 @@ on:
     branches:
       - main
       - dev
+      - hml
+      - feat/implementa-testes-estacao
   pull_request:
     branches:
       - main
       - dev
+      - hml
+      - feat/implementa-testes-estacao
 
 jobs:
   test_unitario:
@@ -38,4 +42,5 @@ jobs:
         with:
           name: relatorio-cobertura
           path: coverage/lcov.info
+
           retention-days: 7
