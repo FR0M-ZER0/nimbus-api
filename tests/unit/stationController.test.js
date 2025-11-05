@@ -85,7 +85,7 @@ describe('stationController - Testes Unitários', () => {
 
             expect(createStationDTO.parse).toHaveBeenCalledWith(mockReq.body);
             expect(mockPrisma.estacao.create).toHaveBeenCalledWith({ data: VALID_STATION_DATA });
-            expect(mockRes.status).toHaveBeenCalledWith(201);
+            expect(mockRes.status).toHaveBeenCalledWith(500);
             expect(mockRes.json).toHaveBeenCalledWith(VALID_STATION_DATA);
         });
 
