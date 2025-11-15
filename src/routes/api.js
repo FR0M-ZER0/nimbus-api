@@ -33,7 +33,8 @@ import {
     getStationById,
     updateStation,
     deleteStation,
-    getStationTipoParametros
+    getStationTipoParametros,
+    getStationParams
 } from '../controllers/stationController.js'
 
 import {
@@ -41,7 +42,8 @@ import {
     getAllParameters,
     getParameterById,
     updateParameter,
-    deleteParameter
+    deleteParameter,
+    getParametersByStationId
 } from '../controllers/parameterController.js'
 
 import {
@@ -70,6 +72,41 @@ import {
 
 import { login } from '../controllers/authController.js';
 
+import {
+  createEstacaoStatus,
+  getAllEstacaoStatus,
+  getEstacaoStatusById,
+  deleteEstacaoStatus,
+  getStatusByEstacao,
+  getLastStatusByEstacao,
+  getEstacoesStatusByOnOff,
+  getActivityHistory,
+  getActivityHistoryAll
+} from '../controllers/estacaoStatusController.js';
+
+import {
+  createEstacaoLog,
+  getAllEstacaoLogs,
+  getEstacaoLogById,
+  deleteEstacaoLog,
+  getLogsByEstacao,
+  getTotalDataSentToday
+} from '../controllers/stationLogController.js'
+
+import {
+  createDataProcessingLog,
+  getAllDataProcessingLogs,
+  getDataProcessingLogById,
+  deleteDataProcessingLog
+} from '../controllers/dataProcessingLogController.js'
+
+import {
+  createMedida,
+  getAllMedidas,
+  getMedidaById,
+  getMedidasByParametro,
+  deleteMedida,
+} from '../controllers/measureController.js'
 
 // Health Check
 
@@ -240,6 +277,7 @@ router.put('/stations/:id', updateStation)
 router.delete('/stations/:id', deleteStation)
 
 router.get("/stations/:id/tipo-parametros", getStationTipoParametros)
+router.get("/stations/:id/params", getStationParams)
 
 /**
 // Parameters
@@ -395,6 +433,8 @@ router.put('/parameters/:id', updateParameter)
  *         description: Erro interno do servidor ao deletar o parâmetro.
  */
 router.delete('/parameters/:id', deleteParameter)
+
+router.get('/parameters/station/:id_estacao', getParametersByStationId)
 
 router.post("/typeParameters", createTipoParametro);
 router.get("/typeParameters", getAllTipoParametro);
@@ -755,6 +795,35 @@ router.put("/alert-type/:id", updateTipoAlerta)
 router.delete("/alert-type/:id", deleteTipoAlerta)
 
 router.post("/login", login)
+
+router.post('/station-status', createEstacaoStatus)
+router.get('/station-status', getAllEstacaoStatus)
+router.get('/station-status/summary', getEstacoesStatusByOnOff)
+router.get('/station-status/station/last/:id_estacao', getLastStatusByEstacao)
+router.get('/station-status/station/:id_estacao', getStatusByEstacao)
+router.get('/station-status/:id', getEstacaoStatusById)
+router.delete('/station-status/:id', deleteEstacaoStatus)
+
+router.post('/station-log', createEstacaoLog)
+router.get('/station-log', getAllEstacaoLogs)
+router.get('/station-log/data-sent', getTotalDataSentToday)
+router.get('/station-log/station/:id_estacao', getLogsByEstacao)
+router.get('/station-log/:id', getEstacaoLogById)
+router.delete('/station-log/:id', deleteEstacaoLog)
+
+router.post('/data-processing-log', createDataProcessingLog)
+router.get('/data-processing-log', getAllDataProcessingLogs)
+router.get('/data-processing-log/:id', getDataProcessingLogById)
+router.delete('/data-processing-log/:id', deleteDataProcessingLog)
+
+router.get('/logs/activity', getActivityHistory)
+router.get('/logs/full-activity', getActivityHistoryAll)
+
+router.post('/measure', createMedida)
+router.get('/measure', getAllMedidas)
+router.get('/measure/params/:id', getMedidasByParametro)
+router.get('/measure/:id', getMedidaById)
+router.delete('/measure/:id', deleteMedida)
 
 export default router
 
