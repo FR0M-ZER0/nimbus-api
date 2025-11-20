@@ -191,3 +191,155 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
+
+/*
+Seed para preencher o banco com dados meteorologicos simulados.
+
+import { PrismaClient } from "../src/generated/prisma/index.js";
+
+const prisma = new PrismaClient();
+
+async function main() {
+  console.log("🌱 Iniciando semeadura (Cenário: Estação Nova - 15 dias)...");
+
+  // 1. Criar Nível Admin
+  const nivelAdmin = await prisma.nivelAcesso.create({
+    data: { descricao: "Administrador" },
+  });
+
+  // 2. Criar Usuário
+  const usuario = await prisma.usuario.create({
+    data: {
+      nome: "Cliente Estação Nova",
+      email: "teste15dias@nimbus.com", // Email novo para diferenciar
+      senha: "123",
+      id_nivel_acesso: nivelAdmin.id_nivel_acesso,
+      ativo: true,
+    },
+  });
+  console.log(`✅ Usuário criado: ${usuario.nome} (ID: ${usuario.id_usuario})`);
+
+  // 3. Tipos de Parâmetros
+  const tipoTemp = await prisma.tipoParametro.create({
+    data: { nome: "Temperatura", unidade: "°C", json: {} },
+  });
+  const tipoUmid = await prisma.tipoParametro.create({
+    data: { nome: "Umidade", unidade: "%", json: {} },
+  });
+
+  // 4. Estação
+  const estacao = await prisma.estacao.create({
+    data: {
+      id_estacao: "EST-NEW-15",
+      nome: "Estação Recém Instalada (Sul)",
+      latitude: -23.55,
+      longitude: -46.63,
+      id_usuario: usuario.id_usuario,
+    },
+  });
+
+  // Status ONLINE
+  await prisma.estacaoStatus.create({
+    data: {
+      status: "ONLINE",
+      id_estacao: estacao.id_estacao,
+      created_at: new Date(),
+    },
+  });
+
+  // 5. Sensores
+  const paramTemp = await prisma.parametro.create({
+    data: {
+      id_estacao: estacao.id_estacao,
+      id_tipo_parametro: tipoTemp.id_tipo_parametro,
+    },
+  });
+  const paramUmid = await prisma.parametro.create({
+    data: {
+      id_estacao: estacao.id_estacao,
+      id_tipo_parametro: tipoUmid.id_tipo_parametro,
+    },
+  });
+
+  // 6. GERAR MEDIDAS (A MUDANÇA ESTÁ AQUI)
+  console.log("⏳ Gerando histórico parcial (Apenas últimos 15 dias)...");
+
+  const medidasTemp = [];
+  const medidasUmid = [];
+  const agora = new Date();
+
+  // Configuração da Simulação
+  const DIAS_HISTORICO = 15; // <--- Mudamos de 30 para 15
+  const LEITURAS_POR_DIA = 4;
+  const TOTAL_ITERACOES = DIAS_HISTORICO * LEITURAS_POR_DIA;
+
+  for (let i = 0; i < TOTAL_ITERACOES; i++) {
+    const dataLeitura = new Date();
+    // Recua no tempo a cada iteração (6 horas)
+    dataLeitura.setHours(agora.getHours() - i * 6);
+
+    const timestamp = Math.floor(dataLeitura.getTime() / 1000);
+
+    // Gera valores aleatórios
+    medidasTemp.push({
+      id_parametro: paramTemp.id_parametro,
+      valor: 20 + Math.random() * 15,
+      data_hora: timestamp,
+    });
+
+    medidasUmid.push({
+      id_parametro: paramUmid.id_parametro,
+      valor: 40 + Math.random() * 50,
+      data_hora: timestamp,
+    });
+  }
+
+  await prisma.medida.createMany({ data: medidasTemp });
+  await prisma.medida.createMany({ data: medidasUmid });
+
+  console.log(
+    `✅ ${
+      medidasTemp.length + medidasUmid.length
+    } medidas inseridas (aprox. 60 por sensor).`
+  );
+
+  // 7. Criar Alertas (Opcional, para testar se aparecem)
+  const alertaTemp = await prisma.alerta.create({
+    data: {
+      titulo: "Instalação Recente",
+      texto: "Monitoramento iniciado com sucesso.",
+      id_parametro: paramTemp.id_parametro,
+    },
+  });
+
+  // Cria um registro de alarme na medida mais recente
+  const medidaRecente = await prisma.medida.findFirst({
+    where: { id_parametro: paramTemp.id_parametro },
+    orderBy: { data_hora: "desc" },
+  });
+
+  if (medidaRecente) {
+    await prisma.alarme.create({
+      data: {
+        id_usuario: usuario.id_usuario,
+        id_medida: medidaRecente.id_medida,
+        id_alerta: alertaTemp.id_alerta,
+        created_at: new Date(),
+      },
+    });
+  }
+
+  console.log("🚀 Seed de 15 dias finalizado!");
+  console.log(`👉 USE ESTE ID NO POSTMAN: ${usuario.id_usuario}`);
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
+*/

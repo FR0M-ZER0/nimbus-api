@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        
+        body { font-family: Arial, sans-serif; color: #333333; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }
+        .header { background-color: #f4f4f4; padding: 20px; text-align: center; border-bottom: 3px solid #007BFF; }
+        .content { padding: 20px; }
+        .station-card { border: 1px solid #dddddd; border-radius: 5px; margin-bottom: 25px; overflow: hidden; }
+        .station-header { background-color: #eeeeee; padding: 10px 15px; border-bottom: 1px solid #dddddd; }
+        .station-title { margin: 0; font-size: 18px; color: #0056b3; }
+        .status-badge { font-weight: bold; padding: 3px 8px; border-radius: 4px; font-size: 12px; color: white; }
+        .status-online { background-color: #28a745; } 
+        .status-offline { background-color: #dc3545; } 
+        
+        
+        .data-table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 14px; }
+        .data-table th { background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 8px; text-align: center; }
+        .data-table td { border: 1px solid #dee2e6; padding: 8px; text-align: center; }
+        
+        .alert-section { background-color: #fff3cd; padding: 10px; font-size: 13px; border-top: 1px solid #ffeeba; }
+        .footer { font-size: 11px; color: #777777; text-align: center; padding: 20px; margin-top: 20px; border-top: 1px solid #eeeeee; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2 style="margin:0;">Nimbus Monitoramento</h2>
+        <p style="margin:5px 0 0; font-size: 14px; color: #666;">Relatório Mensal Consolidado</p>
+    </div>
+
+    <div class="content">
+        <p>Olá, <strong>{{usuarioNome}}</strong>!</p>
+        
+        <p>Esperamos que este e-mail o encontre bem. O sistema Nimbus processou os dados das suas estações.</p>
+        
+        <p style="background-color: #e9ecef; padding: 10px; border-radius: 4px; text-align: center;">
+            <strong>Período de Análise:</strong><br>
+            {{periodo}}
+        </p>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+        {{#each estacoes}}
+        <div class="station-card">
+            <div class="station-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 class="station-title">{{nomeEstacao}}</h3>
+                    {{#if isOnline}}
+                        <span class="status-badge status-online">ONLINE</span>
+                    {{else}}
+                        <span class="status-badge status-offline">OFFLINE</span>
+                    {{/if}}
+                </div>
+                <div style="font-size: 12px; margin-top: 5px; color: #555;">
+                    Última comunicação: {{ultimaComunicacao}}<br>
+                    Total de Leituras: {{totalLeituras}}
+                </div>
+            </div>
+
+            <div style="padding: 0 15px;">
+                {{#if tabelaDados.length}}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left;">Parâmetro</th>
+                            <th>Mín</th>
+                            <th>Média</th>
+                            <th>Máx</th>
+                            <th>Unid.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each tabelaDados}}
+                        <tr>
+                            <td style="text-align: left;">{{nome}}</td>
+                            <td>{{min}}</td>
+                            <td><strong>{{med}}</strong></td>
+                            <td>{{max}}</td>
+                            <td>{{unidade}}</td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+                {{else}}
+                    <p style="text-align: center; color: #999;">Nenhum dado coletado neste período.</p>
+                {{/if}}
+            </div>
+
+            {{#if alertas.length}}
+            <div class="alert-section">
+                <strong>Ocorrências e Alertas:</strong>
+                <ul style="margin: 5px 0 0 20px; padding: 0;">
+                    {{#each alertas}}
+                    <li style="margin-bottom: 4px;">
+                        <strong>{{gravidade}}:</strong> {{titulo}} - {{texto}} 
+                        <span style="color: #666; font-size: 11px;">({{data}})</span>
+                    </li>
+                    {{/each}}
+                </ul>
+            </div>
+            {{/if}}
+        </div>
+        {{/each}}
+        <p style="font-size: 13px; color: #555;">
+            Para ver os gráficos detalhados, acesse o painel completo.
+        </p>
+    </div>
+
+    <div class="footer">
+        Este é um e-mail automático gerado pelo sistema Nimbus.<br>
+        Não responda a este e-mail.
+    </div>
+</div>
+
+</body>
+</html>

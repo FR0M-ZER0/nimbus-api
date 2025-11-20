@@ -1,4 +1,3 @@
-// controllers/tipoParametroController.js
 import { PrismaClient } from "../generated/prisma/index.js";
 import { createTipoParametroDTO, updateTipoParametroDTO } from "../dto/type_ParameterDTO.js";
 

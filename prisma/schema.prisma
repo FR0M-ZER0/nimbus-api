@@ -42,10 +42,10 @@ model Usuario {
   data_criacao    DateTime @default(now())
   ativo           Boolean?
 
-  nivel_acesso NivelAcesso @relation(fields: [id_nivel_acesso], references: [id_nivel_acesso])
-  estacoes     Estacao[]
+  nivel_acesso   NivelAcesso     @relation(fields: [id_nivel_acesso], references: [id_nivel_acesso])
+  estacoes       Estacao[]
   alertaUsuarios AlertaUsuario[]
-  alarmes       Alarme[]
+  alarmes        Alarme[]
 
   @@map("usuarios")
 }
@@ -68,22 +68,22 @@ model Estacao {
   data_criacao DateTime @default(now()) @db.Timestamp(6)
   id_usuario   Int
 
-  usuario    Usuario     @relation(fields: [id_usuario], references: [id_usuario])
-  parametros Parametro[]
+  usuario       Usuario         @relation(fields: [id_usuario], references: [id_usuario])
+  parametros    Parametro[]
   estacaoStatus EstacaoStatus[]
-  estacaoLog EstacaoLog[]
+  estacaoLog    EstacaoLog[]
 
   @@map("estacao")
 }
 
 model TipoParametro {
-  id_tipo_parametro Int       @id @default(autoincrement())
-  nome              String    @unique @db.VarChar(100)
-  unidade           String    @db.VarChar(20)
+  id_tipo_parametro Int     @id @default(autoincrement())
+  nome              String  @unique @db.VarChar(100)
+  unidade           String  @db.VarChar(20)
   fator             Int?
-  polinomio         String?   @db.VarChar(50)
+  polinomio         String? @db.VarChar(50)
   offset            Int?
-  json              Json?     @db.Json
+  json              Json?   @db.Json
 
   parametros Parametro[]
 
@@ -91,10 +91,10 @@ model TipoParametro {
 }
 
 model Parametro {
-  id_parametro      Int      @id @default(autoincrement())
+  id_parametro      Int     @id @default(autoincrement())
   id_estacao        String
   id_tipo_parametro Int
-  descricao         String?  @db.Text
+  descricao         String? @db.Text
 
   estacao        Estacao       @relation(fields: [id_estacao], references: [id_estacao])
   tipo_parametro TipoParametro @relation(fields: [id_tipo_parametro], references: [id_tipo_parametro])
@@ -105,9 +105,9 @@ model Parametro {
 }
 
 model Medida {
-  id_medida    Int      @id @default(autoincrement())
+  id_medida    Int     @id @default(autoincrement())
   id_parametro Int
-  valor        Decimal  @db.Decimal(10, 2)
+  valor        Decimal @db.Decimal(10, 2)
   data_hora    Int
 
   parametro Parametro @relation(fields: [id_parametro], references: [id_parametro])
@@ -117,24 +117,24 @@ model Medida {
 }
 
 model TipoAlerta {
-  id       Int     @id @default(autoincrement())
-  operador String  @db.VarChar(10)
-  valor    Decimal @db.Decimal(10, 2)
+  id       Int      @id @default(autoincrement())
+  operador String   @db.VarChar(10)
+  valor    Decimal  @db.Decimal(10, 2)
   alertas  Alerta[]
 
   @@map("tipo_alerta")
 }
 
 model Alerta {
-  id_alerta        Int       @id @default(autoincrement())
-  titulo           String    @db.VarChar(255)
-  texto            String    @db.Text
-  data_hora        DateTime  @default(now())
-  id_tipo_alerta   Int?
-  id_parametro     Int?
+  id_alerta      Int      @id @default(autoincrement())
+  titulo         String   @db.VarChar(255)
+  texto          String   @db.Text
+  data_hora      DateTime @default(now())
+  id_tipo_alerta Int?
+  id_parametro   Int?
 
-  tipo_alerta    TipoAlerta? @relation(fields: [id_tipo_alerta], references: [id])
-  parametro      Parametro?  @relation(fields: [id_parametro], references: [id_parametro])
+  tipo_alerta    TipoAlerta?     @relation(fields: [id_tipo_alerta], references: [id])
+  parametro      Parametro?      @relation(fields: [id_parametro], references: [id_parametro])
   alertaUsuarios AlertaUsuario[]
   alarmes        Alarme[]
 
@@ -168,27 +168,30 @@ model Alarme {
 }
 
 model EstacaoStatus {
-  id_status Int @id @default(autoincrement())
-  status Status
+  id_status  Int      @id @default(autoincrement())
+  status     Status
   created_at DateTime @default(now())
 
   id_estacao String
-  estacao Estacao @relation(fields: [id_estacao], references: [id_estacao])
+  estacao    Estacao @relation(fields: [id_estacao], references: [id_estacao])
+
   @@map("estacao_status")
 }
 
 model EstacaoLog {
-  id_log Int @id @default(autoincrement())
-  data_sent Int // it's in kb
+  id_log     Int      @id @default(autoincrement())
+  data_sent  Int // it's in kb
   created_at DateTime @default(now())
 
   id_estacao String
-  estacao Estacao @relation(fields: [id_estacao], references: [id_estacao])
+  estacao    Estacao @relation(fields: [id_estacao], references: [id_estacao])
+
   @@map("estacao_log")
 }
 
 model DataProcessingLog {
-  id_log Int @id @default(autoincrement())
+  id_log     Int      @id @default(autoincrement())
   created_at DateTime @default(now())
+
   @@map("data_processing_log")
 }
