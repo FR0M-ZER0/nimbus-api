@@ -1,0 +1,10 @@
+node_modules
+
+.git
+.gitignore
+
+# Ignora arquivos de configuração do Docker e CI
+Dockerfile
+.dockerignore
+.github
+.env
