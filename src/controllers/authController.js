@@ -12,7 +12,7 @@ export const login = async (req, res) => {
 
     const usuario = await prisma.usuario.findUnique({
       where: { email: data.email },
-      include: { nivel_acesso: true },
+      include: { nivel_acesso: true, estacoes: true },
     });
 
     if (!usuario) {
@@ -59,7 +59,7 @@ export const me = async (req, res) => {
 
     const user = await prisma.usuario.findUnique({
       where: { id_usuario: userId },
-      include: { nivel_acesso: true }
+      include: { nivel_acesso: true, estacoes: true }
     })
 
     const { senha, ...noPwdUser } = user
