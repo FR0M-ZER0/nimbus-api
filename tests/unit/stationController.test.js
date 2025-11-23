@@ -15,7 +15,6 @@ import {
 } from '../../src/dto/stationDTO.js'; 
 
 import { paginationQueryDTO } from '../../src/dto/paginationDTO.js'; 
-import { PrismaClient } from '../../src/generated/prisma/index.js';
 
 const mockPrisma = {
     estacao: {
