@@ -9,7 +9,8 @@ import {
     getAllUsuarios,
     deleteUsuario,
     getUsuarioById,
-    updateUsuario
+    updateUsuario,
+    updateUsuarioPassword
 } from '../controllers/userController.js'
 
 import { 
@@ -612,6 +613,8 @@ router.post('/user', validate(createUsuarioSchema), createUsuario);
  *         description: Erro no servidor
  */
 router.put('/user/:id', validate(updateUsuarioSchema), updateUsuario);
+
+router.put('/user/password/:id', updateUsuarioPassword)
 
 /**
  * @swagger
