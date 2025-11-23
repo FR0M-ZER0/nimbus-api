@@ -70,7 +70,7 @@ import {
   deleteTipoAlerta,
 } from "../controllers/alertTypeController.js";
 
-import { login } from '../controllers/authController.js';
+import { login, me } from '../controllers/authController.js';
 
 import {
   createEstacaoStatus,
@@ -107,6 +107,7 @@ import {
   getMedidasByParametro,
   deleteMedida,
 } from '../controllers/measureController.js'
+import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 // Health Check
 
@@ -824,6 +825,8 @@ router.get('/measure', getAllMedidas)
 router.get('/measure/params/:id', getMedidasByParametro)
 router.get('/measure/:id', getMedidaById)
 router.delete('/measure/:id', deleteMedida)
+
+router.get('/me', authMiddleware, me)
 
 export default router
 
