@@ -11,7 +11,8 @@ import {
     getAllUsuarios,
     deleteUsuario,
     getUsuarioById,
-    updateUsuario
+    updateUsuario,
+    updateUsuarioPassword
 } from '../controllers/userController.js'
 
 import { 
@@ -72,7 +73,7 @@ import {
   deleteTipoAlerta,
 } from "../controllers/alertTypeController.js";
 
-import { login } from '../controllers/authController.js';
+import { checkIfAnyUserExists, login, me } from '../controllers/authController.js';
 
 import {
   createEstacaoStatus,
@@ -109,6 +110,7 @@ import {
   getMedidasByParametro,
   deleteMedida,
 } from '../controllers/measureController.js'
+import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 // Health Check
 
@@ -496,6 +498,8 @@ router.delete("/typeParameters/:id", deleteTipoParametro);
  */
 router.get('/user', getAllUsuarios);
 
+router.get('/user/check-existance', checkIfAnyUserExists)
+
 /**
  * @swagger
  * /api/user/{id}:
@@ -613,6 +617,8 @@ router.post('/user', validate(createUsuarioSchema), createUsuario);
  *         description: Erro no servidor
  */
 router.put('/user/:id', validate(updateUsuarioSchema), updateUsuario);
+
+router.put('/user/password/:id', updateUsuarioPassword)
 
 /**
  * @swagger
@@ -827,6 +833,7 @@ router.get('/measure/params/:id', getMedidasByParametro)
 router.get('/measure/:id', getMedidaById)
 router.delete('/measure/:id', deleteMedida)
 
+router.get('/me', authMiddleware, me)
 router.get('/reports/measurements', getMeasurementReport);
 router.get('/reports/alarms', getAlarmReport);
 
