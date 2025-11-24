@@ -3,10 +3,14 @@ import { PrismaClient } from '../generated/prisma/index.js';
 import { createStationDTO, updateStationDTO } from '../dto/stationDTO.js';
 import { paginationQueryDTO } from '../dto/paginationDTO.js';
 
-const prisma = new PrismaClient();
+const getPrismaInstance = () => {
+    const prisma = new PrismaClient(); 
+    return prisma;
+};
 
 // Post /stations - Cria uma nova estação
 export const createStation = async (req, res) => {
+  const prisma = getPrismaInstance();
   try {
     const validatedData = createStationDTO.parse(req.body);
     const station = await prisma.estacao.create({
@@ -14,7 +18,6 @@ export const createStation = async (req, res) => {
     });
     res.status(201).json(station);
   } catch (error) {
-    // A verificação robusta que funcionou no teste de fumaça
     if (error.name === 'ZodError') { 
     const errorMessages = error.issues.map(issue => ({
         field: issue.path.join('.'),
@@ -43,6 +46,7 @@ export const createStation = async (req, res) => {
 
 // Get /stations - Lista todas as estações
 export const getAllStations = async (req, res) => {
+  const prisma = getPrismaInstance();
   try {
     const { page, limit, sortBy, sortOrder } = paginationQueryDTO.parse(req.query);
         
@@ -77,6 +81,7 @@ export const getAllStations = async (req, res) => {
 
 // Get /stations/:id - Busca uma estação pelo id
 export const getStationById = async (req, res) => {
+  const prisma = getPrismaInstance();
     try {
         const { id } = req.params;
         const station = await prisma.estacao.findUnique({
@@ -103,6 +108,7 @@ export const getStationById = async (req, res) => {
 
 // Get /stations/:id/tipo-parametros - Obtém todos os tipos de parâmetros de uma estação
 export const getStationTipoParametros = async (req, res) => {
+  const prisma = getPrismaInstance();
   try {
     const { id } = req.params;
 
@@ -136,6 +142,7 @@ export const getStationTipoParametros = async (req, res) => {
 
 // Put /stations/:id - Atualiza uma estação pelo id
 export const updateStation = async (req, res) => {
+  const prisma = getPrismaInstance();
     try {
         const { id } = req.params;
         const validatedData = updateStationDTO.parse(req.body);
@@ -165,6 +172,7 @@ export const updateStation = async (req, res) => {
 
 // Delete /stations/:id - Deleta uma estação pelo id
 export const deleteStation = async (req, res) => {
+  const prisma = getPrismaInstance();
     try {
         const { id } = req.params;
         await prisma.estacao.delete({
@@ -182,6 +190,7 @@ export const deleteStation = async (req, res) => {
 
 // Get /stations/:id/parametros - Obtém todos os parâmetros de uma estação com seus tipos
 export const getStationParams = async (req, res) => {
+  const prisma = getPrismaInstance();
   try {
     const { id } = req.params;
 

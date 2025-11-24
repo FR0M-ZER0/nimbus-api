@@ -4,6 +4,8 @@ const router = express.Router()
 // controllers
 import { healthCheck } from '../controllers/healthCheckController.js'
 
+import { getMeasurementReport, getAlarmReport } from '../controllers/relatorioPDFController.js';
+
 import {
     createUsuario,
     getAllUsuarios,
@@ -832,6 +834,8 @@ router.get('/measure/:id', getMedidaById)
 router.delete('/measure/:id', deleteMedida)
 
 router.get('/me', authMiddleware, me)
+router.get('/reports/measurements', getMeasurementReport);
+router.get('/reports/alarms', getAlarmReport);
 
 export default router
 
