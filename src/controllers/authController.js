@@ -70,3 +70,18 @@ export const me = async (req, res) => {
     console.log(error)
   }
 }
+
+export const checkIfAnyUserExists = async (req, res) => {
+  try {
+    const users = await prisma.usuario.findMany({
+      where: { id_nivel_acesso: 1 }
+    })
+
+    const exists = users.length > 0
+
+    res.status(200).json({ exists })
+  } catch(err) {
+    console.error(err)
+    res.status(500).json({ message: 'Não foi possível verificar se existe algum usuário.' })
+  }
+}

@@ -71,7 +71,7 @@ import {
   deleteTipoAlerta,
 } from "../controllers/alertTypeController.js";
 
-import { login, me } from '../controllers/authController.js';
+import { checkIfAnyUserExists, login, me } from '../controllers/authController.js';
 
 import {
   createEstacaoStatus,
@@ -495,6 +495,8 @@ router.delete("/typeParameters/:id", deleteTipoParametro);
  *         description: Erro no servidor
  */
 router.get('/user', getAllUsuarios);
+
+router.get('/user/check-existance', checkIfAnyUserExists)
 
 /**
  * @swagger
