@@ -1,6 +1,6 @@
 import { PrismaClient } from "../generated/prisma/index.js";
 import { createAlarmeDTO } from "../dto/alarmeDTO.js";
-import { startOfDay, endOfDay } from 'date-fns'
+import { startOfDay, endOfDay, startOfMonth, endOfMonth } from 'date-fns'
 
 const prisma = new PrismaClient();
 
@@ -127,6 +127,34 @@ export const getTodaysAlarme = async (req, res) => {
   } catch (error) {
     console.error(error)
     res.status(500).json({ message: "Erro ao buscar os alarmes de hoje", error: error.message })
+  }
+}
+
+// GET /alarmes/by-month?year=2025&month=10
+export const getAlarmesByMonth = async (req, res) => {
+  try {
+    const year = parseInt(req.query.year)
+    const month = parseInt(req.query.month) - 1
+
+    const start = startOfMonth(new Date(year, month))
+    const end = endOfMonth(new Date(year, month))
+
+    const alarmes = await prisma.alarme.findMany({
+      where: {
+        created_at: {
+          gte: start,
+          lte: end
+        }
+      },
+      select: {
+        created_at: true
+      }
+    })
+
+    res.status(200).json(alarmes)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: "Erro ao buscar alarmes do mês" })
   }
 }
 
