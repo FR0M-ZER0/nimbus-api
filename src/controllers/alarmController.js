@@ -38,8 +38,21 @@ export const getAllAlarmes = async (req, res) => {
     const alarmes = await prisma.alarme.findMany({
       include: {
         usuario: { select: { id_usuario: true, nome: true, email: true } },
-        medida: true,
-        alerta: true,
+        medida: {
+          include: {
+            parametro: {
+              include: {
+                estacao: true,
+                tipo_parametro: true
+              }
+            }
+          }
+        },
+        alerta: {
+          include: {
+            tipo_alerta: true
+          }
+        }
       },
       orderBy: { created_at: "desc" },
     });
@@ -93,8 +106,21 @@ export const getTodaysAlarme = async (req, res) => {
       },
       include: {
         usuario: { select: { id_usuario: true, nome: true, email: true } },
-        medida: true,
-        alerta: true,
+        medida: {
+          include: {
+            parametro: {
+              include: {
+                estacao: true,
+                tipo_parametro: true
+              }
+            }
+          }
+        },
+        alerta: {
+          include: {
+            tipo_alerta: true
+          }
+        }
       }
     })
     res.status(200).json(alarms)
