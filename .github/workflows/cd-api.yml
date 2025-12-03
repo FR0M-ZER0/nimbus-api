@@ -26,12 +26,12 @@ jobs:
           docker-compose build --no-cache
           docker-compose up -d
 
-      - name: Aplicar Migrations (Prisma)
+      - name: Aguardar Banco de Dados
+        run: Start-Sleep -Seconds 15 
 
-        run: |
-          Start-Sleep -Seconds 10
-          docker exec nimbus-api npx prisma migrate deploy
-
+      - name: Sincronizar Schema (Prisma DB Push)
+        run: docker exec nimbus-api npx prisma db push --accept-data-loss
+        
       - name: Limpeza
         if: always()
         run: docker image prune -f
