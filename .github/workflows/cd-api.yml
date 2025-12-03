@@ -1,0 +1,37 @@
+name: Deploy Backend Local
+
+on:
+  push:
+    branches: [ "hml" ] 
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Código
+        uses: actions/checkout@v4
+
+      - name: Criar arquivo .env
+      
+        run: |
+          Set-Content -Path .env -Value "DB_USER=${{ secrets.DB_USER }}" -Encoding Ascii
+          Add-Content -Path .env -Value "DB_PASS=${{ secrets.DB_PASS }}" -Encoding Ascii
+          Add-Content -Path .env -Value "DB_NAME=${{ secrets.DB_NAME }}" -Encoding Ascii
+          Add-Content -Path .env -Value "JWT_SECRET=${{ secrets.JWT_SECRET }}" -Encoding Ascii
+
+      - name: Build e Deploy
+        run: |
+          docker-compose down
+          docker-compose build --no-cache
+          docker-compose up -d
+
+      - name: Aplicar Migrations (Prisma)
+
+        run: |
+          Start-Sleep -Seconds 10
+          docker exec nimbus-api npx prisma migrate deploy
+
+      - name: Limpeza
+        if: always()
+        run: docker image prune -f

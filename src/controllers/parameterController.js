@@ -107,3 +107,29 @@ export const deleteParameter = async (req, res) => {
       .json({ message: "Erro ao deletar o parâmetro", error: error.message });
   }
 };
+
+// Get /stations/:id_estacao/parameters - Lista todos os parâmetros de uma estação específica
+export const getParametersByStationId = async (req, res) => {
+  try {
+    const { id_estacao } = req.params;
+
+    const parameters = await prisma.parametro.findMany({
+      where: { id_estacao },
+      include: {
+        tipo_parametro: true,
+      },
+    });
+
+    if (parameters.length === 0) {
+      return res.status(404).json({ message: "Nenhum parâmetro encontrado para esta estação." });
+    }
+
+    res.status(200).json(parameters);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Erro ao buscar parâmetros da estação",
+      error: error.message,
+    });
+  }
+};

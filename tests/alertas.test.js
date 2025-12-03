@@ -5,7 +5,7 @@ import { PrismaClient } from '../src/generated/prisma/index.js';
 
 const prisma = new PrismaClient();
 
-// Variáveis para armazenar os dados criados para os testes
+// Variáveis para armazenar os dados criados para os testes.
 let testUser;
 let testTipoAlerta;
 let testAlerta;
