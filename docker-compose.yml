@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: nimbus-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432" 
+    volumes:
+      - postgres_data:/var/lib/postgresql/data 
+
+  mongo:
+    image: mongo:6.0
+    container_name: nimbus-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db 
+      
+  api:
+    build: .
+    container_name: nimbus-api
+    restart: always
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+      - mongo
+    environment:
+      DATABASE_URL: "postgresql://${DB_USER}:${DB_PASS}@postgres:5432/${DB_NAME}?schema=public"
+      JWT_SECRET: ${JWT_SECRET}
+      
+volumes:
+  postgres_data:
+  mongo_data:

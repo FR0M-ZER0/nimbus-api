@@ -8,10 +8,14 @@ import { swaggerDocs } from './config/swagger.js'
 const app = express()
 
 app.use(express.json())
+
 app.use(cors({
-    origin: process.env.CLIENT_ADDRESS,
-    credentials: true
+    origin: true, 
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }))
+
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs))
 app.use('/api', router)
 
