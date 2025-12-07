@@ -1,6 +1,6 @@
 import { PrismaClient } from '../generated/prisma/index.js';
 import bcrypt from 'bcrypt';
-import { CreateUsuarioDto, UpdateUsuarioDto } from '../dto/userDTO.js';
+import { CreateUsuarioDto, updatePasswordDTO, UpdateUsuarioDto } from '../dto/userDTO.js';
 
 const prisma = new PrismaClient();
 
@@ -153,6 +153,54 @@ export const updateUsuario = async (req, res) => {
       return res.status(400).json({ error: 'Erro de validação', details: error.message });
     }
     res.status(500).json({ error: 'Falha ao atualizar usuário' });
+  }
+};
+
+export const updateUsuarioPassword = async (req, res) => {
+  try {
+    const parsed = updatePasswordDTO.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        error: 'Erro de validação',
+        details: parsed.error.errors
+      });
+    }
+
+    const { current_password, new_password, password_confirmation } = parsed.data;
+    const { id } = req.params;
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { id_usuario: parseInt(id) }
+    });
+
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    if (new_password !== password_confirmation) {
+      return res.status(400).json({ error: 'A nova senha e a confirmação não coincidem.' });
+    }
+
+    const validPassword = await bcrypt.compare(current_password, usuario.senha);
+    if (!validPassword) {
+      return res.status(401).json({ error: 'Senha atual incorreta.' });
+    }
+
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(new_password, saltRounds);
+
+    const updatedUsuario = await prisma.usuario.update({
+      where: { id_usuario: parseInt(id) },
+      data: { senha: hashedPassword },
+      include: { nivel_acesso: true }
+    });
+
+    const { senha: _, ...usuarioResponse } = updatedUsuario;
+
+    res.json({ usuarioResponse});
+  } catch (error) {
+    console.error('Error updating password:', error);
+    res.status(500).json({ error: 'Falha ao atualizar senha' });
   }
 };
 
