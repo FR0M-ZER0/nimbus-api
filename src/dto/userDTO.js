@@ -28,6 +28,12 @@ const updateSchema = z.object({
     .optional()
 });
 
+const updatePasswordDTO = z.object({
+  current_password: z.string({ required_error: 'Senha atual é obrigatória.' }),
+  new_password: z.string({ required_error: 'Senha nova é obrigatória.' }),
+  password_confirmation: z.string({ required_error: 'Confirmar senha atual é obrigatório.' })
+})
+
 // Schema para validação de parâmetros (ex: /:id)
 const idParamSchema = z.object({
   id: z.coerce.number().int('ID do usuário deve ser um número inteiro')
@@ -59,4 +65,4 @@ class UpdateUsuarioDto {
   }
 }
 
-export { CreateUsuarioDto, UpdateUsuarioDto };
+export { CreateUsuarioDto, UpdateUsuarioDto, updatePasswordDTO };
